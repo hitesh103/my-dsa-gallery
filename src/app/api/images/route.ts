@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { listImages } from "@/lib/images";
 
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const prefix = searchParams.get("prefix") ?? undefined;
@@ -16,4 +15,3 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
-

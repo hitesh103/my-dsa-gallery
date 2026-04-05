@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 
 import { getR2Bucket, getR2Client } from "@/lib/r2";
 
-
 function safeFilename(name: string) {
   return name
     .trim()

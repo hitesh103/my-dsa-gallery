@@ -53,6 +53,16 @@ export const PROBLEMS: Entry[] = [
   },
 ];
 
+export function getProblemIndex(): ProblemMeta[] {
+  return PROBLEMS.map(({ slug, title, topic, pattern, link }) => ({
+    slug,
+    title,
+    topic,
+    pattern,
+    link,
+  }));
+}
+
 export function getProblemSlugs() {
   return PROBLEMS.map((p) => p.slug);
 }
@@ -74,4 +84,3 @@ export function groupProblems() {
   }
   return Array.from(byTopic.entries()).sort((a, b) => a[0].localeCompare(b[0]));
 }
-

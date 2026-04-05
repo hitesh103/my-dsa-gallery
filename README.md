@@ -2,7 +2,7 @@ Minimalist DSA write-ups (MDX) + study image gallery (Cloudflare R2).
 
 ## Getting Started
 
-Run the development server :
+Run the development server:
 
 ```bash
 npm run dev

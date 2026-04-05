@@ -1,6 +1,5 @@
 import NextLink from "next/link";
 
-
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-10 px-4 py-14">
