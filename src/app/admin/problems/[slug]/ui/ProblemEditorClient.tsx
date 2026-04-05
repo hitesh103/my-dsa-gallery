@@ -1,11 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { ProblemContent, ProblemDoc } from "@/lib/problemDoc";
-import { getAdminToken, setAdminToken } from "@/lib/adminToken";
 
 type ApiGet = { problem: ProblemDoc } | { error: string };
 
@@ -44,7 +43,6 @@ function lines(value: string) {
 }
 
 export function ProblemEditorClient({ slug }: { slug: string }) {
-  const [token, setToken] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [doc, setDoc] = useState<ProblemDoc>({
@@ -55,16 +53,6 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
     link: "",
     content: emptyContent(),
   });
-
-  const authHeader = useMemo(() => {
-    const t = token.trim();
-    return t ? { Authorization: `Bearer ${t}` } : {};
-  }, [token]);
-
-  useEffect(() => {
-    const t = getAdminToken();
-    if (t) setToken(t);
-  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -110,19 +98,10 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
     void load();
   }, [slug]);
 
-  const onSaveToken = () => {
-    const t = token.trim();
-    if (!t) return;
-    setAdminToken(t);
-    setStatus("Saved token in this browser.");
-  };
-
   const onSave = async () => {
     setStatus(null);
     try {
       const headers: Record<string, string> = { "Content-Type": "application/json" };
-      const t = token.trim();
-      if (t) headers.Authorization = `Bearer ${t}`;
 
       const targetSlug = doc.slug.trim() || slug;
       if (!/^[a-z0-9-]+$/.test(targetSlug)) {
@@ -183,25 +162,9 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Access</CardTitle>
+          <CardTitle>Editing</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Admin token</span>
-            <input
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Set ADMIN_TOKEN in Cloudflare env"
-              className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-            />
-          </label>
-          <button
-            type="button"
-            onClick={onSaveToken}
-            className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
-          >
-            Save token
-          </button>
           {status ? (
             <div className="rounded-xl border bg-card p-3 text-xs text-muted-foreground">
               {status}

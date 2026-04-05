@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getAdminToken } from "@/lib/adminToken";
+import { useAdminAuth } from "@/components/admin/useAdminAuth";
 import { cn } from "@/lib/cn";
 
 export function ImageDeleteButton({
@@ -14,14 +14,10 @@ export function ImageDeleteButton({
   className?: string;
 }) {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const { loggedIn } = useAdminAuth();
 
-  useEffect(() => {
-    setToken(getAdminToken());
-  }, []);
-
-  if (!token) return null;
+  if (!loggedIn) return null;
 
   const onDelete = async () => {
     if (busy) return;
@@ -32,7 +28,6 @@ export function ImageDeleteButton({
     try {
       const res = await fetch(`/api/images?key=${encodeURIComponent(imageKey)}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
       const json = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || json.error) throw new Error(json.error ?? "Delete failed");
@@ -61,4 +56,3 @@ export function ImageDeleteButton({
     </button>
   );
 }
-

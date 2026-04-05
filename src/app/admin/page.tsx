@@ -1,8 +1,11 @@
 import { AdminClient } from "./ui/AdminClient";
+import { AdminLogin } from "./ui/AdminLogin";
+import { isAdminPageRequest } from "@/lib/adminPageGuard";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminPage() {
+export default async function AdminPage() {
+  const ok = await isAdminPageRequest();
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">
       <div className="flex flex-col gap-2">
@@ -13,9 +16,8 @@ export default function AdminPage() {
       </div>
 
       <div className="mt-6">
-        <AdminClient />
+        {ok ? <AdminClient /> : <AdminLogin />}
       </div>
     </main>
   );
 }
-

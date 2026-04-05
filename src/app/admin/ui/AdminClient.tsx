@@ -1,28 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { ProblemMeta } from "@/lib/problemDoc";
-import { clearAdminToken, getAdminToken, setAdminToken } from "@/lib/adminToken";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
 import { JsonProblemEditor } from "./JsonProblemEditor";
 
 type ApiProblems = { problems: ProblemMeta[] } | { error: string };
 
 export function AdminClient() {
-  const [token, setToken] = useState("");
   const [status, setStatus] = useState<string | null>(null);
   const [problems, setProblems] = useState<ProblemMeta[]>([]);
-
-  const authHeader = useMemo(() => {
-    const t = token.trim();
-    const headers: Record<string, string> = {};
-    if (t) headers.Authorization = `Bearer ${t}`;
-    return headers;
-  }, [token]);
 
   const refresh = async () => {
     setStatus(null);
@@ -39,27 +30,14 @@ export function AdminClient() {
   };
 
   useEffect(() => {
-    const t = getAdminToken();
-    if (t) setToken(t);
     void refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const onSaveToken = () => {
-    const t = token.trim();
-    if (!t) {
-      clearAdminToken();
-      setStatus("Cleared token.");
-      return;
-    }
-    setAdminToken(t);
-    setStatus("Saved token in this browser (you only need to do this once per browser).");
-  };
-
   const onSeed = async () => {
     setStatus(null);
     try {
-      const res = await fetch("/api/admin/seed", { method: "POST", headers: authHeader });
+      const res = await fetch("/api/admin/seed", { method: "POST" });
       const json = (await res.json()) as { ok?: boolean; error?: string; seeded?: number; message?: string };
       if (!res.ok || json.error) throw new Error(json.error ?? "Seed failed");
       setStatus(json.message ?? `Seeded ${json.seeded ?? 0} problems.`);
@@ -70,31 +48,27 @@ export function AdminClient() {
     }
   };
 
+  const onLogout = async () => {
+    setStatus(null);
+    try {
+      const res = await fetch("/api/admin/auth", { method: "DELETE" });
+      const json = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok || json.error) throw new Error(json.error ?? "Logout failed");
+      window.location.reload();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Unknown error";
+      setStatus(msg);
+    }
+  };
+
   return (
     <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
       <Card>
         <CardHeader>
-          <CardTitle>Access</CardTitle>
+          <CardTitle>Admin</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Admin token</span>
-            <input
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              placeholder="Set ADMIN_TOKEN in Cloudflare env"
-              className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-            />
-          </label>
-
           <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="button"
-              onClick={onSaveToken}
-              className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
-            >
-              Save token
-            </button>
             <button
               type="button"
               onClick={onSeed}
@@ -109,6 +83,13 @@ export function AdminClient() {
             >
               Refresh
             </button>
+            <button
+              type="button"
+              onClick={onLogout}
+              className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
+            >
+              Logout
+            </button>
           </div>
 
           {status ? (
@@ -116,16 +97,7 @@ export function AdminClient() {
           ) : null}
 
           <div className="text-xs text-muted-foreground">
-            Notes:
-            <ul className="mt-2 list-disc space-y-1 pl-4">
-              <li>
-                Create a D1 database and bind it as <code>DB</code>.
-              </li>
-              <li>
-                Set <code>ADMIN_TOKEN</code> as a secret in Cloudflare Pages/Workers env.
-              </li>
-              <li>Token is stored in your browser localStorage after you click “Save token”.</li>
-            </ul>
+            Create/update problems from JSON, seed initial problems, and manage uploads.
           </div>
         </CardContent>
       </Card>
@@ -136,7 +108,7 @@ export function AdminClient() {
             <CardTitle>JSON Editor</CardTitle>
           </CardHeader>
           <CardContent>
-            <JsonProblemEditor token={token} onStatus={(m) => setStatus(m)} />
+            <JsonProblemEditor onStatus={(m) => setStatus(m)} />
           </CardContent>
         </Card>
 

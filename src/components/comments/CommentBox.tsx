@@ -1,21 +1,20 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getAdminToken } from "@/lib/adminToken";
+import { useAdminAuth } from "@/components/admin/useAdminAuth";
 import { cn } from "@/lib/cn";
 
 export function CommentBox({ slug, className }: { slug: string; className?: string }) {
   const router = useRouter();
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
-
-  const token = useMemo(() => getAdminToken(), []);
+  const { loggedIn } = useAdminAuth();
 
   const onPost = async () => {
-    if (!token) {
-      window.alert("Admin token not found. Open /admin and click “Save token”.");
+    if (!loggedIn) {
+      window.alert("Login at /admin to add comments.");
       return;
     }
     const body = text.trim();
@@ -27,7 +26,6 @@ export function CommentBox({ slug, className }: { slug: string; className?: stri
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ slug, body }),
       });
@@ -54,7 +52,7 @@ export function CommentBox({ slug, className }: { slug: string; className?: stri
       />
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs text-muted-foreground">
-          Stored in D1. {token ? "Admin enabled." : "Admin token missing."}
+          Stored in D1. {loggedIn ? "Admin enabled." : "Login required."}
         </div>
         <button
           type="button"
@@ -68,4 +66,3 @@ export function CommentBox({ slug, className }: { slug: string; className?: stri
     </div>
   );
 }
-

@@ -9,6 +9,9 @@ import { CloudIcon, HeartIcon } from "@/components/ui/Icons";
 export const metadata: Metadata = {
   title: "My DSA Gallery",
   description: "Minimalist DSA + Study Gallery",
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -24,11 +27,8 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-            <NextLink
-              href="/"
-              className="flex items-center gap-2 font-semibold tracking-tight"
-            >
-              <span>my dsa gallery</span>
+            <NextLink href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+              <span>My DSA Gallery</span>
               <HeartIcon className="h-4 w-4 text-muted-foreground" />
             </NextLink>
             <nav className="flex items-center gap-4 text-sm text-muted-foreground">

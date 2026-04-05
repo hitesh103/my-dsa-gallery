@@ -1,12 +1,8 @@
-export function requireAdmin(req: Request) {
-  const expected = process.env.ADMIN_TOKEN;
-  if (!expected) {
-    throw new Error("ADMIN_TOKEN is not configured.");
-  }
+import { isAdminRequest } from "@/lib/adminSession";
 
-  const auth = req.headers.get("authorization") ?? "";
-  const token = auth.toLowerCase().startsWith("bearer ") ? auth.slice(7).trim() : null;
-  if (!token || token !== expected) {
+export async function requireAdmin(req: Request) {
+  const ok = await isAdminRequest(req);
+  if (!ok) {
     const err = new Error("Unauthorized");
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (err as any).status = 401;
@@ -20,4 +16,3 @@ export function errorStatus(err: unknown) {
   const status = typeof anyErr?.status === "number" ? anyErr.status : 500;
   return status >= 400 && status <= 599 ? status : 500;
 }
-

@@ -48,10 +48,8 @@ function isValidSlug(slug: string) {
 }
 
 export function JsonProblemEditor({
-  token,
   onStatus,
 }: {
-  token: string;
   onStatus: (msg: string) => void;
 }) {
   const [slug, setSlug] = useState("");
@@ -59,11 +57,9 @@ export function JsonProblemEditor({
   const [busy, setBusy] = useState(false);
 
   const authHeader = useMemo(() => {
-    const t = token.trim();
     const headers: Record<string, string> = { "Content-Type": "application/json" };
-    if (t) headers.Authorization = `Bearer ${t}`;
     return headers;
-  }, [token]);
+  }, []);
 
   const onTemplate = () => {
     setJsonText(JSON.stringify(defaultPayload(), null, 2));
@@ -97,12 +93,6 @@ export function JsonProblemEditor({
   };
 
   const onUpsert = async () => {
-    const t = token.trim();
-    if (!t) {
-      onStatus("Set ADMIN_TOKEN and click “Save token” first.");
-      return;
-    }
-
     let payload: ProblemDoc;
     try {
       payload = JSON.parse(jsonText) as ProblemDoc;
@@ -190,4 +180,3 @@ export function JsonProblemEditor({
     </div>
   );
 }
-
