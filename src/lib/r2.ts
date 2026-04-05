@@ -1,4 +1,5 @@
 import { S3Client } from "@aws-sdk/client-s3";
+import { FetchHttpHandler } from "@smithy/fetch-http-handler";
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -21,6 +22,9 @@ export function getR2Client() {
     region: "auto",
     endpoint,
     forcePathStyle: true,
+    // Avoid Node-only defaults/providers that try to touch the filesystem in workerd.
+    defaultsMode: "standard",
+    requestHandler: new FetchHttpHandler(),
     credentials: { accessKeyId, secretAccessKey },
   });
 
@@ -41,4 +45,3 @@ export function toPublicUrl(key: string) {
     .join("/");
   return `${trimmed}/${encoded}`;
 }
-
