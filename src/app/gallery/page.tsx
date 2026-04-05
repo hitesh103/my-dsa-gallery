@@ -2,7 +2,6 @@ import { listImages } from "@/lib/images";
 
 import { UploadClient } from "./UploadClient";
 
-export const runtime = "edge";
 
 export default async function GalleryPage() {
   let images: Awaited<ReturnType<typeof listImages>> = [];

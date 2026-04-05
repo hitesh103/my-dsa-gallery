@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/Badge";
 import { getProblemBySlug } from "@/lib/problems";
 import { StudyImages } from "./StudyImages";
 
-export const runtime = "edge";
 
 export default async function ProblemPage({
   params,

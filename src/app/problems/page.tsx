@@ -3,7 +3,6 @@ import NextLink from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { groupProblems } from "@/lib/problems";
 
-export const runtime = "edge";
 
 export default function ProblemsIndexPage() {
   const grouped = groupProblems();
