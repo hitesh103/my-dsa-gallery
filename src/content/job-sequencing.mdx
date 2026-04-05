@@ -1,0 +1,187 @@
+import { ComplexityBadge } from "@/components/dsa/ComplexityBadge";
+import { QuickRevision } from "@/components/dsa/QuickRevision";
+import { Link } from "@/components/ui/Link";
+
+export const meta = {
+  slug: "job-sequencing",
+  title: "Job Sequencing (Greedy)",
+  topic: "Greedy",
+  pattern: "Sort by profit + place latest slot",
+  link: "https://www.geeksforgeeks.org/problems/job-sequencing-problem-1587115620/1",
+};
+
+# Job Sequencing (Greedy)
+
+Problem link: <Link href={meta.link}>{meta.link}</Link>
+
+## Problem Statement
+
+You are given `N` jobs. Each job takes **1 unit of time** and has:
+
+- a `deadline` (latest time slot it can be completed)
+- a `profit` (earned if completed before or on its deadline)
+
+Schedule jobs to **maximize total profit** (and typically also compute number of jobs done).
+
+## Input
+
+- Jobs array with `(id, deadline, profit)`
+
+## Output
+
+- Usually: `[jobsDone, totalProfit]`
+
+## Example
+
+```txt
+jobs = [(1,2,100), (2,1,19), (3,2,27), (4,1,25), (5,3,15)]
+output = [2, 127]
+```
+
+Explanation: choose profitable jobs and place them within deadlines (e.g., profit 100 at slot 2, profit 27 at slot 1).
+
+## Brute Force
+
+### Intuition
+
+Try all ways to place jobs into time slots, track the best profit.
+
+### Approach (Backtracking)
+
+Let `M = maxDeadline`. Create `slot[1..M]` to track used time slots.  
+Backtrack over jobs: for each job, try to place it into any free slot `t <= deadline` (or skip it).
+
+### Code (Java)
+
+```java
+public class JobSequencingBruteForce {
+    static class Job {
+        int id, deadline, profit;
+        Job(int id, int deadline, int profit) {
+            this.id = id;
+            this.deadline = deadline;
+            this.profit = profit;
+        }
+    }
+
+    static int bestProfit;
+    static int bestCount;
+
+    public static int[] jobScheduling(Job[] jobs) {
+        int maxDeadline = 0;
+        for (Job j : jobs) maxDeadline = Math.max(maxDeadline, j.deadline);
+        boolean[] slot = new boolean[maxDeadline + 1]; // 1..maxDeadline
+
+        bestProfit = 0;
+        bestCount = 0;
+        dfs(0, jobs, slot, 0, 0);
+        return new int[] { bestCount, bestProfit };
+    }
+
+    private static void dfs(int i, Job[] jobs, boolean[] slot, int count, int profit) {
+        if (i == jobs.length) {
+            if (profit > bestProfit) {
+                bestProfit = profit;
+                bestCount = count;
+            }
+            return;
+        }
+
+        // Option 1: skip
+        dfs(i + 1, jobs, slot, count, profit);
+
+        // Option 2: try placing in any free slot <= deadline
+        Job j = jobs[i];
+        int last = Math.min(j.deadline, slot.length - 1);
+        for (int t = 1; t <= last; t++) {
+            if (slot[t]) continue;
+            slot[t] = true;
+            dfs(i + 1, jobs, slot, count + 1, profit + j.profit);
+            slot[t] = false;
+        }
+    }
+}
+```
+
+<ComplexityBadge time="O(2^N · M)" space="O(M)" />
+
+### Complexity Analysis (with explanation)
+
+- **Time ~`O(2^N · M)`**: each job can be skipped/taken; taking may try up to `M` slots.
+- **Space `O(M)`**: the slot array tracks used time slots.
+
+## Optimal Solution
+
+### Intuition (Mental model)
+
+To maximize profit:
+
+1. Prefer high-profit jobs.
+2. For each chosen job, schedule it as **late as possible** before its deadline,
+   so earlier slots remain available for other jobs.
+
+### Approach (Greedy + slot scan)
+
+Sort by profit descending. Maintain a boolean array of available time slots.
+
+For each job, scan backwards from `min(deadline, maxDeadline)` to find the latest free slot.
+
+### Code (Java)
+
+```java
+import java.util.Arrays;
+
+public class JobSequencingOptimal {
+    static class Job {
+        int id, deadline, profit;
+        Job(int id, int deadline, int profit) {
+            this.id = id;
+            this.deadline = deadline;
+            this.profit = profit;
+        }
+    }
+
+    // Returns [jobsDone, totalProfit]
+    public static int[] jobScheduling(Job[] jobs) {
+        Arrays.sort(jobs, (a, b) -> b.profit - a.profit);
+
+        int maxDeadline = 0;
+        for (Job j : jobs) maxDeadline = Math.max(maxDeadline, j.deadline);
+
+        boolean[] slot = new boolean[maxDeadline + 1]; // 1..maxDeadline
+        int count = 0, profit = 0;
+
+        for (Job j : jobs) {
+            for (int t = Math.min(j.deadline, maxDeadline); t >= 1; t--) {
+                if (!slot[t]) {
+                    slot[t] = true;
+                    count++;
+                    profit += j.profit;
+                    break;
+                }
+            }
+        }
+        return new int[] { count, profit };
+    }
+}
+```
+
+<ComplexityBadge time="O(N log N + N · M)" space="O(M)" />
+
+### Complexity Analysis (with explanation)
+
+- **Time `O(N log N)`** to sort by profit, plus **`O(N · M)`** for backward slot scans.
+- **Space `O(M)`** for the time-slot array.
+
+<QuickRevision
+  brute={[
+    "Backtracking over jobs; try placing each into any free slot <= deadline (or skip).",
+    "Correct but blows up quickly.",
+    "Time ~O(2^N·M), Space O(M).",
+  ]}
+  optimal={[
+    "Sort by profit descending.",
+    "Place each job at the latest free slot <= deadline.",
+    "Time O(N log N + N·M), Space O(M).",
+  ]}
+/>

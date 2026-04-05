@@ -1,0 +1,150 @@
+import { ComplexityBadge } from "@/components/dsa/ComplexityBadge";
+import { QuickRevision } from "@/components/dsa/QuickRevision";
+import { Link } from "@/components/ui/Link";
+
+export const meta = {
+  slug: "find-leaf-nodes",
+  title: "Find Leaf Nodes (Tree)",
+  topic: "Trees",
+  pattern: "DFS/BFS traversal",
+  link: "https://www.geeksforgeeks.org/print-leaf-nodes-binary-tree-right-left/",
+};
+
+# Find Leaf Nodes (Tree)
+
+Problem link: <Link href={meta.link}>{meta.link}</Link>
+
+## Problem Statement
+
+Given the root of a binary tree, return (or print) all **leaf nodes**.
+
+## Input
+
+- `root`: binary tree root
+
+## Output
+
+- List of leaf values (any order depending on traversal)
+
+## Example
+
+```txt
+    1
+   / \
+  2   3
+ /
+4
+
+output = [4, 3]
+```
+
+Explanation: nodes `4` and `3` have no children.
+
+## Brute Force
+
+### Intuition
+
+Traverse all nodes; whenever you see a node with no children, it’s a leaf.
+
+### Approach (Level-order / BFS)
+
+```java
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+public class FindLeafNodesBFS {
+    static class TreeNode {
+        int val;
+        TreeNode left, right;
+        TreeNode(int val) { this.val = val; }
+    }
+
+    public static List<Integer> leafNodes(TreeNode root) {
+        List<Integer> leaves = new ArrayList<>();
+        if (root == null) return leaves;
+
+        Queue<TreeNode> q = new LinkedList<>();
+        q.add(root);
+        while (!q.isEmpty()) {
+            TreeNode node = q.poll();
+            if (node.left == null && node.right == null) {
+                leaves.add(node.val);
+                continue;
+            }
+            if (node.left != null) q.add(node.left);
+            if (node.right != null) q.add(node.right);
+        }
+        return leaves;
+    }
+}
+```
+
+<ComplexityBadge time="O(N)" space="O(N)" />
+
+### Complexity Analysis (with explanation)
+
+- **Time `O(N)`**: each node is visited once.
+- **Space `O(N)`**: worst-case queue size can be `O(N)` for a wide tree.
+
+## Optimal Solution
+
+### Intuition
+
+A **leaf** is any node with `left == null` and `right == null`.
+
+DFS naturally reaches leaves and can collect them with only recursion stack space.
+
+### Approach (DFS)
+
+DFS is simpler and uses stack space proportional to tree height.
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class FindLeafNodesDFS {
+    static class TreeNode {
+        int val;
+        TreeNode left, right;
+        TreeNode(int val) { this.val = val; }
+    }
+
+    public static List<Integer> leafNodes(TreeNode root) {
+        List<Integer> leaves = new ArrayList<>();
+        dfs(root, leaves);
+        return leaves;
+    }
+
+    private static void dfs(TreeNode node, List<Integer> leaves) {
+        if (node == null) return;
+        if (node.left == null && node.right == null) {
+            leaves.add(node.val);
+            return;
+        }
+        dfs(node.left, leaves);
+        dfs(node.right, leaves);
+    }
+}
+```
+
+<ComplexityBadge time="O(N)" space="O(H)" />
+
+### Complexity Analysis (with explanation)
+
+- **Time `O(N)`**: each node is visited once.
+- **Space `O(H)`**: recursion stack depth is tree height `H` (worst-case `N` for a skewed tree).
+
+<QuickRevision
+  brute={[
+    "BFS/level-order: visit all nodes and collect those with no children.",
+    "Queue can grow large for wide trees.",
+    "Time O(N), Space O(N).",
+  ]}
+  optimal={[
+    "DFS: when node has no children, add it to answer.",
+    "Uses recursion stack proportional to height.",
+    "Time O(N), Space O(H).",
+  ]}
+/>

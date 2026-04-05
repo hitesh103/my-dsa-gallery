@@ -1,0 +1,125 @@
+/* Minimal Prism theme tuned for Zinc/Slate (supports light + dark) */
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: hsl(var(--code-fg));
+  background: none;
+  text-shadow: none;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  tab-size: 2;
+  hyphens: none;
+}
+
+pre[class*="language-"] {
+  padding: 1rem;
+  margin: 0;
+  overflow: auto;
+  border-radius: 0.75rem;
+  background: hsl(var(--code-bg));
+  border: 1px solid hsl(var(--code-border));
+}
+
+:not(pre) > code[class*="language-"] {
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.375rem;
+  background: hsl(var(--code-bg));
+  border: 1px solid hsl(var(--code-border));
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: hsl(var(--code-comment));
+}
+
+.token.punctuation {
+  color: hsl(var(--code-punct));
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: hsl(var(--code-const));
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: hsl(var(--code-string));
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable {
+  color: hsl(var(--code-var));
+}
+
+.token.atrule,
+.token.attr-value,
+.token.function,
+.token.class-name {
+  color: hsl(var(--code-fn));
+}
+
+.token.keyword {
+  color: hsl(var(--code-keyword));
+}
+
+.token.regex,
+.token.important {
+  color: hsl(var(--code-regex));
+}
+
+.token.important,
+.token.bold {
+  font-weight: 700;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+/* Theme tokens */
+:root {
+  --code-bg: 0 0% 98%;
+  --code-border: 240 5.9% 90%;
+  --code-fg: 240 10% 3.9%;
+  --code-comment: 240 3.8% 46.1%;
+  --code-punct: 240 5.3% 26.1%;
+  --code-const: 0 65% 35%;
+  --code-string: 142 50% 30%;
+  --code-var: 221 83% 35%;
+  --code-fn: 48 96% 30%;
+  --code-keyword: 271 81% 35%;
+  --code-regex: 28 95% 35%;
+}
+
+:root.dark {
+  --code-bg: 240 10% 8%;
+  --code-border: 240 3.7% 15.9%;
+  --code-fg: 0 0% 98%;
+  --code-comment: 240 5% 64.9%;
+  --code-punct: 240 5% 85%;
+  --code-const: 0 70% 70%;
+  --code-string: 142 55% 62%;
+  --code-var: 220 80% 75%;
+  --code-fn: 48 90% 70%;
+  --code-keyword: 280 70% 76%;
+  --code-regex: 28 90% 70%;
+}
