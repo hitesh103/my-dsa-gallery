@@ -172,14 +172,14 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-3">
               <label className="flex flex-col gap-1">
                 <span className="text-xs font-medium text-muted-foreground">Query</span>
                 <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search title, topic, pattern…"
-                className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30 min-h-[44px]"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -187,7 +187,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
               <select
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30 min-h-[44px]"
               >
                 <option value="all">All topics</option>
                 {topics.map((t) => (
@@ -202,7 +202,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
               <select
                 value={pattern}
                 onChange={(e) => setPattern(e.target.value)}
-                className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30 min-h-[44px]"
               >
                 <option value="all">All patterns</option>
                 {patterns.map((p) => (

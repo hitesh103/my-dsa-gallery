@@ -154,18 +154,18 @@ export function JsonProblemEditor({
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2">
         <input
           value={slug}
           onChange={(e) => setSlug(e.target.value)}
           placeholder="slug to load (e.g. jump-game-ii)"
-          className="h-10 w-full max-w-sm rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+          className="h-11 w-full sm:max-w-[200px] rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30 min-h-[44px]"
         />
         <button
           type="button"
           onClick={onLoad}
           disabled={busy}
-          className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted disabled:opacity-50 min-h-[44px]"
         >
           Load JSON
         </button>
@@ -173,7 +173,7 @@ export function JsonProblemEditor({
           type="button"
           onClick={onTemplate}
           disabled={busy}
-          className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted disabled:opacity-50 min-h-[44px]"
         >
           Template
         </button>
@@ -181,16 +181,16 @@ export function JsonProblemEditor({
           type="button"
           onClick={onUpsert}
           disabled={busy}
-          className="ml-auto inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted disabled:opacity-50"
+          className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted disabled:opacity-50 min-h-[44px]"
         >
-          {busy ? "Saving…" : "Upsert from JSON"}
+          {busy ? "Saving…" : "Upsert"}
         </button>
       </div>
 
       <textarea
         value={jsonText}
         onChange={(e) => setJsonText(e.target.value)}
-        rows={28}
+        rows={16}
         spellCheck={false}
         className="w-full rounded-xl border bg-background px-3 py-3 font-mono text-xs leading-5 outline-none focus:ring-2 focus:ring-ring/30"
       />

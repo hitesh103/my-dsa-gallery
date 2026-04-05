@@ -101,9 +101,27 @@ body {
 
   html {
     color-scheme: light;
+    scroll-behavior: smooth;
   }
 
   html.dark {
     color-scheme: dark;
+  }
+
+  /* iOS Safe Area Support */
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Touch-friendly sizing */
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent text selection on UI elements */
+  .no-select {
+    -webkit-user-select: none;
+    user-select: none;
   }
 }

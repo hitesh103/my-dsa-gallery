@@ -17,7 +17,7 @@ export default async function AdminProblemEditPage({
   const ok = await isAdminPageRequest();
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
       {ok ? <ProblemEditorClient slug={slug} /> : <AdminLogin />}
     </main>
   );

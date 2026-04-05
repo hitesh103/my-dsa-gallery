@@ -15,9 +15,9 @@ export default async function GalleryPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-10">
+    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight">Gallery</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Gallery</h1>
         <p className="text-sm text-muted-foreground">
           Clean, minimalist masonry grid for study screenshots.
         </p>

@@ -8,9 +8,9 @@ export default async function ProblemsIndexPage() {
     const problems = await listProblems({ limit: 500 });
 
     return (
-      <main className="mx-auto w-full max-w-6xl px-4 py-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Problems</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Problems</h1>
           <p className="text-sm text-muted-foreground">
             Grouped by topic and pattern. Each write-up includes intuition,
             brute force, optimal solution, and quick revision.
@@ -23,9 +23,9 @@ export default async function ProblemsIndexPage() {
   } catch (e) {
     const message = e instanceof Error ? e.message : "Unknown error";
     return (
-      <main className="mx-auto w-full max-w-6xl px-4 py-10">
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">Problems</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Problems</h1>
           <p className="text-sm text-muted-foreground">
             This app is configured to use D1 for problems.
           </p>

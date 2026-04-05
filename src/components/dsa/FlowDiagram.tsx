@@ -204,12 +204,12 @@ export function FlowDiagram({
       style={{ borderColor: border }}
     >
       {hasMultipleSteps && (
-        <div className="flex items-center justify-between gap-3 border-b px-4 py-3" style={{ borderColor: border }}>
+        <div className="flex items-center justify-between gap-2 sm:gap-3 border-b px-3 py-2 sm:px-4 sm:py-3" style={{ borderColor: border }}>
           <button
             onClick={goToPrev}
             disabled={currentStep === 0}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              "rounded-lg px-2.5 py-2 text-sm font-medium transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
               currentStep === 0
                 ? "cursor-not-allowed opacity-40"
                 : "hover:bg-accent"
@@ -219,11 +219,11 @@ export function FlowDiagram({
             ← Prev
           </button>
           <div className="flex flex-col items-center gap-1">
-            <span className="text-sm font-semibold" style={{ color: isDark ? "#e4e4e7" : "#18181b" }}>
+            <span className="text-sm font-semibold truncate max-w-[200px] sm:max-w-none" style={{ color: isDark ? "#e4e4e7" : "#18181b" }}>
               {step.label || `Step ${currentStep + 1}`}
             </span>
             {step.description && (
-              <span className="text-xs" style={{ color: isDark ? "#a1a1aa" : "#71717a" }}>
+              <span className="text-xs truncate max-w-[200px] sm:max-w-none" style={{ color: isDark ? "#a1a1aa" : "#71717a" }}>
                 {step.description}
               </span>
             )}
@@ -233,16 +233,23 @@ export function FlowDiagram({
                   key={idx}
                   onClick={() => setCurrentStep(idx)}
                   className={cn(
-                    "h-2 w-2 rounded-full transition-colors",
+                    "h-2 w-2 rounded-full transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center",
                     idx === currentStep ? "" : "opacity-40 hover:opacity-70"
                   )}
-                  style={{
-                    backgroundColor: idx === currentStep
-                      ? (isDark ? "#3b82f6" : "#2563eb")
-                      : (isDark ? "#71717a" : "#a1a1aa")
-                  }}
                   aria-label={`Go to step ${idx + 1}`}
-                />
+                >
+                  <span
+                    className={cn(
+                      "block h-2 w-2 rounded-full",
+                      idx === currentStep ? "" : "opacity-40"
+                    )}
+                    style={{
+                      backgroundColor: idx === currentStep
+                        ? (isDark ? "#3b82f6" : "#2563eb")
+                        : (isDark ? "#71717a" : "#a1a1aa")
+                    }}
+                  />
+                </button>
               ))}
             </div>
           </div>
@@ -250,7 +257,7 @@ export function FlowDiagram({
             onClick={goToNext}
             disabled={currentStep === steps.length - 1}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              "rounded-lg px-2.5 py-2 text-sm font-medium transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
               currentStep === steps.length - 1
                 ? "cursor-not-allowed opacity-40"
                 : "hover:bg-accent"
@@ -261,9 +268,9 @@ export function FlowDiagram({
           </button>
         </div>
       )}
-      <div className="p-4" style={{ borderColor: border }}>
+      <div className="p-3 sm:p-4" style={{ borderColor: border }}>
         {legendItems.length > 0 && <Legend items={legendItems} isDark={isDark} />}
-        <div className="h-[360px] w-full overflow-hidden rounded-lg" style={{ background: bg }}>
+        <div className="h-[280px] sm:h-[360px] w-full overflow-hidden rounded-lg" style={{ background: bg }}>
           <ReactFlow
             nodes={nodes}
             edges={edges}

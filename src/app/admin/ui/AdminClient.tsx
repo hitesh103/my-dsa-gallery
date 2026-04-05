@@ -72,21 +72,21 @@ export function AdminClient() {
             <button
               type="button"
               onClick={onSeed}
-              className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
+              className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted min-h-[44px]"
             >
               Seed initial problems
             </button>
             <button
               type="button"
               onClick={refresh}
-              className="ml-auto inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
+              className="ml-auto inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted min-h-[44px]"
             >
               Refresh
             </button>
             <button
               type="button"
               onClick={onLogout}
-              className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
+              className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted min-h-[44px]"
             >
               Logout
             </button>

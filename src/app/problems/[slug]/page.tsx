@@ -43,26 +43,26 @@ export default async function ProblemPage({
   };
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10">
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone={toneForTopic(meta.topic)}>{meta.topic}</Badge>
           <Badge tone={toneForPattern(meta.pattern)}>{meta.pattern}</Badge>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <a
             href={meta.link}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-lg border px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-[44px]"
           >
             Open Problem
           </a>
           <a
             href={`/admin/problems/${slug}`}
-            className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center rounded-lg border px-3 py-2.5 text-xs font-medium hover:bg-muted min-h-[44px]"
           >
-            Edit in App
+            Edit
           </a>
         </div>
       </div>
