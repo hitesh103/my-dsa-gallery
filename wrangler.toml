@@ -14,3 +14,8 @@ binding = "DB"
 database_name = "my-dsa-gallery"
 database_id = "2947afb4-1063-4999-a9bb-223e23c3281a"
 migrations_dir = "migrations"
+
+[observability]
+[observability.logs]
+enabled = true
+invocation_logs = true
