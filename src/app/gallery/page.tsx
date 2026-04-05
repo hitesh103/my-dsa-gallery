@@ -1,6 +1,7 @@
 import { listImages } from "@/lib/images";
 
 import { UploadClient } from "./UploadClient";
+import { ImageDeleteButton } from "@/components/gallery/ImageDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -48,8 +49,9 @@ export default async function GalleryPage() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={img.url} alt={img.key} className="h-auto w-full" loading="lazy" />
-            <figcaption className="border-t px-3 py-2 text-xs text-muted-foreground">
-              {img.key.replace(/^gallery\//, "")}
+            <figcaption className="flex items-center justify-between gap-2 border-t px-3 py-2 text-xs text-muted-foreground">
+              <span className="truncate">{img.key.replace(/^gallery\//, "")}</span>
+              <ImageDeleteButton imageKey={img.key} />
             </figcaption>
           </figure>
         ))}

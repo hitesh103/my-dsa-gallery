@@ -1,8 +1,25 @@
 import { ProblemsClient } from "./ProblemsClient";
 import { getProblemIndex } from "@/lib/problems";
+import { listProblems } from "@/lib/problemStore";
 
-export default function ProblemsIndexPage() {
-  const problems = getProblemIndex();
+export const dynamic = "force-dynamic";
+
+export default async function ProblemsIndexPage() {
+  let problems = getProblemIndex();
+  try {
+    const fromD1 = await listProblems({ limit: 500 });
+    if (fromD1.length) {
+      problems = fromD1.map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        topic: p.topic,
+        pattern: p.pattern,
+        link: p.link,
+      }));
+    }
+  } catch {
+    // D1 not configured or unavailable; keep file-backed index.
+  }
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-10">

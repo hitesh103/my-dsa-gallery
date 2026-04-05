@@ -40,6 +40,12 @@ export default function RootLayout({
               >
                 Gallery
               </NextLink>
+              <NextLink
+                href="/admin"
+                className="hover:text-foreground transition-colors"
+              >
+                Admin
+              </NextLink>
             </nav>
           </div>
         </header>

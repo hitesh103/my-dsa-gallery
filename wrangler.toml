@@ -2,8 +2,17 @@ name = "my-dsa-hub"
 main = ".open-next/worker.js"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
+migrations_dir = "migrations"
 
 [assets]
 directory = ".open-next/assets"
 binding = "ASSETS"
 
+# D1 (recommended for in-app editing + search)
+# - Bind this in Cloudflare Pages/Workers as `DB`.
+# - Fill `database_id` with the value printed by `wrangler d1 create`.
+#
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "my-dsa-gallery"
+# database_id = "PASTE_DATABASE_ID_HERE"

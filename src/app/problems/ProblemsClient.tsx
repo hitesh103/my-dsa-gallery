@@ -12,11 +12,21 @@ function uniqSorted(items: string[]) {
   return Array.from(new Set(items)).sort((a, b) => a.localeCompare(b));
 }
 
+function useDebouncedValue<T>(value: T, delayMs: number) {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const t = window.setTimeout(() => setDebounced(value), delayMs);
+    return () => window.clearTimeout(t);
+  }, [value, delayMs]);
+  return debounced;
+}
+
 export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
   const [q, setQ] = useState("");
   const [topic, setTopic] = useState<string>("all");
   const [pattern, setPattern] = useState<string>("all");
   const [view, setView] = useState<"grouped" | "board" | "list">("grouped");
+  const [remote, setRemote] = useState<ProblemMeta[] | null>(null);
 
   useEffect(() => {
     try {
@@ -43,9 +53,51 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
     [problems],
   );
 
+  const dq = useDebouncedValue(q, 250);
+  const dTopic = useDebouncedValue(topic, 250);
+  const dPattern = useDebouncedValue(pattern, 250);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      const query = dq.trim();
+      const hasFilters = query || dTopic !== "all" || dPattern !== "all";
+      // If nothing is filtered, keep local list (fast and works without D1).
+      if (!hasFilters) {
+        setRemote(null);
+        return;
+      }
+
+      const params = new URLSearchParams();
+      if (query) params.set("q", query);
+      if (dTopic !== "all") params.set("topic", dTopic);
+      if (dPattern !== "all") params.set("pattern", dPattern);
+      params.set("limit", "500");
+
+      try {
+        const res = await fetch(`/api/problems?${params.toString()}`, { cache: "no-store" });
+        const json = (await res.json()) as
+          | { problems: ProblemMeta[] }
+          | { error: string };
+        if (!res.ok || "error" in json) throw new Error();
+        if (!cancelled) setRemote(json.problems);
+      } catch {
+        // D1 not configured or API unavailable; fall back to local filtering.
+        if (!cancelled) setRemote(null);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [dq, dTopic, dPattern]);
+
+  const baseList = remote ?? problems;
+
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    return problems.filter((p) => {
+    return baseList.filter((p) => {
       if (topic !== "all" && p.topic !== topic) return false;
       if (pattern !== "all" && p.pattern !== pattern) return false;
       if (!query) return true;
@@ -56,7 +108,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
         p.pattern.toLowerCase().includes(query)
       );
     });
-  }, [problems, q, topic, pattern]);
+  }, [baseList, q, topic, pattern]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, ProblemMeta[]>();

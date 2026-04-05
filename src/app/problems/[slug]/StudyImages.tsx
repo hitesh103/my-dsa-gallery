@@ -1,4 +1,5 @@
 import { UploadClient } from "@/components/gallery/UploadClient";
+import { ImageDeleteButton } from "@/components/gallery/ImageDeleteButton";
 import { listImages } from "@/lib/images";
 
 export async function StudyImages({ slug }: { slug: string }) {
@@ -44,8 +45,9 @@ export async function StudyImages({ slug }: { slug: string }) {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img.url} alt={img.key} className="h-auto w-full" loading="lazy" />
-              <figcaption className="border-t px-3 py-2 text-xs text-muted-foreground">
-                {img.key.replace(prefix, "")}
+              <figcaption className="flex items-center justify-between gap-2 border-t px-3 py-2 text-xs text-muted-foreground">
+                <span className="truncate">{img.key.replace(prefix, "")}</span>
+                <ImageDeleteButton imageKey={img.key} />
               </figcaption>
             </figure>
           ))}
@@ -54,4 +56,3 @@ export async function StudyImages({ slug }: { slug: string }) {
     </section>
   );
 }
-
