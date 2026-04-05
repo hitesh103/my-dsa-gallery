@@ -29,9 +29,11 @@ export function computeSearchText(problem: ProblemDoc) {
     problem.content.exampleExplanationMd,
     problem.content.brute.intuitionMd,
     problem.content.brute.approachMd,
+    problem.content.brute.mermaid ?? "",
     problem.content.brute.complexityExplanationMd,
     problem.content.optimal.intuitionMd,
     problem.content.optimal.approachMd,
+    problem.content.optimal.mermaid ?? "",
     problem.content.optimal.complexityExplanationMd,
     ...(problem.content.quickRevision.brute ?? []),
     ...(problem.content.quickRevision.optimal ?? []),
@@ -169,4 +171,3 @@ export async function upsertProblem(problem: ProblemDoc): Promise<void> {
     )
     .run();
 }
-

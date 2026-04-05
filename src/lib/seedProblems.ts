@@ -18,6 +18,13 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
         intuitionMd: "Just find the first position where the condition becomes true.",
         approachMd:
           "Scan from left to right; return the first index with `a[i] >= x`. If none, return `n`.",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[Start] --> B[Scan i from 0..n-1]\n" +
+          "  B --> C{a[i] >= x?}\n" +
+          "  C -- yes --> D[return i]\n" +
+          "  C -- no --> B\n" +
+          "  B --> E[return n]\n",
         codeJava:
           "public class LowerBoundLinear {\n" +
           "    // Returns the first index i such that a[i] >= x, or n if it doesn't exist.\n" +
@@ -38,6 +45,16 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
           "Think of **“first true”** in a monotonic boolean array.\n\nBecause the array is sorted, the predicate `a[i] >= x` becomes:\n\n`false false false ... true true true`\n\nThe lower bound is the first index where it becomes `true`.",
         approachMd:
           "Maintain a search space `[lo, hi)` such that the answer is always inside it.\n\n- Invariant: all indices `< lo` are **definitely false** (`a[i] < x`)\n- Invariant: all indices `>= hi` are **definitely true** (or “past the array”)\n- Shrink until `lo == hi` → that index is the first `true`",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[lo=0, hi=n] --> B{lo < hi?}\n" +
+          "  B -- no --> Z[return lo]\n" +
+          "  B -- yes --> C[mid = lo + (hi-lo)/2]\n" +
+          "  C --> D{a[mid] >= x?}\n" +
+          "  D -- yes --> E[hi = mid]\n" +
+          "  D -- no --> F[lo = mid + 1]\n" +
+          "  E --> B\n" +
+          "  F --> B\n",
         codeJava:
           "public class LowerBoundBinarySearch {\n" +
           "    // Returns the first index i such that a[i] >= x, or n if it doesn't exist.\n" +
@@ -91,6 +108,14 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
           "If we know the best answer to reach smaller indices, we can build the best answer for later indices.",
         approachMd:
           "Let `dp[i]` be the minimum jumps to reach index `i`.\nFor each `i`, try all `j < i` that can reach `i`.",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[dp[0]=0, dp[others]=INF] --> B[i=1..n-1]\n" +
+          "  B --> C[j=0..i-1]\n" +
+          "  C --> D{j+nums[j] >= i?}\n" +
+          "  D -- yes --> E[dp[i] = min(dp[i], dp[j]+1)]\n" +
+          "  D -- no --> C\n" +
+          "  E --> C\n",
         codeJava:
           "import java.util.Arrays;\n\n" +
           "public class JumpGameIIBruteForce {\n" +
@@ -118,6 +143,14 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
         intuitionMd:
           "Every index you can reach with `k` jumps forms a **range**.\nFrom that range, one more jump can expand to a new range.\n\nTrack:\n\n- `currentEnd`: end of the current jump range\n- `farthest`: farthest index reachable from within the current range",
         approachMd: "Scan once, maintaining the current “level” end.",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[jumps=0, currentEnd=0, farthest=0] --> B[i=0..n-2]\n" +
+          "  B --> C[farthest=max(farthest, i+nums[i])]\n" +
+          "  C --> D{i == currentEnd?}\n" +
+          "  D -- yes --> E[jumps++ ; currentEnd=farthest]\n" +
+          "  D -- no --> B\n" +
+          "  E --> B\n",
         codeJava:
           "public class JumpGameIIOptimal {\n" +
           "    public static int jump(int[] nums) {\n" +
@@ -175,6 +208,15 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
           "Try to place queens row by row; for each placement, check if it conflicts with earlier queens.",
         approachMd:
           "Backtrack row by row. To validate a placement, scan up-left, up-right, and up (column).",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[Row r] --> B[Try col c]\n" +
+          "  B --> C{isSafe by scanning?}\n" +
+          "  C -- no --> B\n" +
+          "  C -- yes --> D[Place Q]\n" +
+          "  D --> E[Recurse r+1]\n" +
+          "  E --> F[Remove Q]\n" +
+          "  F --> B\n",
         codeJava:
           "import java.util.ArrayList;\n" +
           "import java.util.List;\n\n" +
@@ -230,6 +272,15 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
           "When you place a queen at `(row, col)`, you block:\n\n- the column `col`\n- the main diagonal `(row - col)`\n- the anti-diagonal `(row + col)`\n\nHash these constraints to get O(1) safety checks.",
         approachMd:
           "Use boolean arrays for O(1) safety checks:\n\n- `cols[c]`\n- `diag1[row - col + (n - 1)]`\n- `diag2[row + col]`",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[Row r] --> B[Try col c]\n" +
+          "  B --> C{cols[c] or diag1 or diag2 used?}\n" +
+          "  C -- yes --> B\n" +
+          "  C -- no --> D[Mark used + place Q]\n" +
+          "  D --> E[Recurse r+1]\n" +
+          "  E --> F[Unmark + remove Q]\n" +
+          "  F --> B\n",
         codeJava:
           "import java.util.ArrayList;\n" +
           "import java.util.List;\n\n" +
@@ -314,6 +365,14 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
         intuitionMd: "Try all ways to place jobs into time slots, track the best profit.",
         approachMd:
           "Let `M = maxDeadline`. Create `slot[1..M]` to track used time slots.\nBacktrack over jobs: for each job, try to place it into any free slot `t <= deadline` (or skip it).",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[i-th job] --> B{Skip?}\n" +
+          "  B -- yes --> C[dfs(i+1)]\n" +
+          "  B -- no --> D[Try slot t<=deadline]\n" +
+          "  D --> E{slot free?}\n" +
+          "  E -- yes --> F[mark; dfs(i+1); unmark]\n" +
+          "  E -- no --> D\n",
         codeJava:
           "public class JobSequencingBruteForce {\n" +
           "    static class Job {\n" +
@@ -366,6 +425,14 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
           "To maximize profit:\n\n1. Prefer high-profit jobs.\n2. For each chosen job, schedule it as **late as possible** before its deadline, so earlier slots remain available for other jobs.",
         approachMd:
           "Sort by profit descending. Maintain a boolean array of available time slots.\n\nFor each job, scan backwards from `min(deadline, maxDeadline)` to find the latest free slot.",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[Sort by profit desc] --> B[For each job]\n" +
+          "  B --> C[Scan t=deadline..1]\n" +
+          "  C --> D{slot[t] free?}\n" +
+          "  D -- yes --> E[assign; add profit]\n" +
+          "  D -- no --> C\n" +
+          "  E --> B\n",
         codeJava:
           "import java.util.Arrays;\n\n" +
           "public class JobSequencingOptimal {\n" +
@@ -431,6 +498,15 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
       brute: {
         intuitionMd: "Traverse all nodes; whenever you see a node with no children, it’s a leaf.",
         approachMd: "Level-order (BFS): visit all nodes and collect leaves.",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[Queue root] --> B{queue empty?}\n" +
+          "  B -- no --> C[pop node]\n" +
+          "  C --> D{leaf?}\n" +
+          "  D -- yes --> E[add to list]\n" +
+          "  D -- no --> F[push children]\n" +
+          "  E --> B\n" +
+          "  F --> B\n",
         codeJava:
           "import java.util.ArrayList;\n" +
           "import java.util.LinkedList;\n" +
@@ -468,6 +544,15 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
         intuitionMd:
           "A **leaf** is any node with `left == null` and `right == null`.\nDFS naturally reaches leaves and can collect them with only recursion stack space.",
         approachMd: "DFS is simpler and uses stack space proportional to tree height.",
+        mermaid:
+          "flowchart TD\n" +
+          "  A[dfs(node)] --> B{node == null?}\n" +
+          "  B -- yes --> Z[return]\n" +
+          "  B -- no --> C{leaf?}\n" +
+          "  C -- yes --> D[add leaf]\n" +
+          "  C -- no --> E[dfs(left); dfs(right)]\n" +
+          "  D --> Z\n" +
+          "  E --> Z\n",
         codeJava:
           "import java.util.ArrayList;\n" +
           "import java.util.List;\n\n" +
@@ -512,4 +597,3 @@ export const SEED_PROBLEMS: ProblemDoc[] = [
     },
   },
 ];
-

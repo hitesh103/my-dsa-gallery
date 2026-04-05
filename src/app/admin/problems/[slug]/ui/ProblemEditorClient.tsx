@@ -18,6 +18,7 @@ function emptyContent(): ProblemContent {
     brute: {
       intuitionMd: "",
       approachMd: "",
+      mermaid: "",
       codeJava: "",
       time: "",
       space: "",
@@ -26,6 +27,7 @@ function emptyContent(): ProblemContent {
     optimal: {
       intuitionMd: "",
       approachMd: "",
+      mermaid: "",
       codeJava: "",
       time: "",
       space: "",
@@ -349,6 +351,21 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
               />
             </label>
             <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                Visualization (Mermaid)
+              </span>
+              <textarea
+                value={doc.content.brute.mermaid ?? ""}
+                onChange={(e) =>
+                  updateContent({ brute: { ...doc.content.brute, mermaid: e.target.value } })
+                }
+                rows={8}
+                spellCheck={false}
+                className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                placeholder={"flowchart TD\n  A[Start] --> B[...]\n"}
+              />
+            </label>
+            <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted-foreground">Java code</span>
               <textarea
                 value={doc.content.brute.codeJava}
@@ -428,6 +445,23 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
                 }
                 rows={6}
                 className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                Visualization (Mermaid)
+              </span>
+              <textarea
+                value={doc.content.optimal.mermaid ?? ""}
+                onChange={(e) =>
+                  updateContent({
+                    optimal: { ...doc.content.optimal, mermaid: e.target.value },
+                  })
+                }
+                rows={8}
+                spellCheck={false}
+                className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                placeholder={"flowchart TD\n  A[Start] --> B[...]\n"}
               />
             </label>
             <label className="flex flex-col gap-1">

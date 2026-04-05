@@ -7,6 +7,7 @@ export type ProblemContent = {
   brute: {
     intuitionMd: string;
     approachMd: string;
+    mermaid?: string;
     codeJava: string;
     time: string;
     space: string;
@@ -15,6 +16,7 @@ export type ProblemContent = {
   optimal: {
     intuitionMd: string;
     approachMd: string;
+    mermaid?: string;
     codeJava: string;
     time: string;
     space: string;
@@ -40,4 +42,3 @@ export type ProblemDoc = {
 export type ProblemMeta = Pick<ProblemDoc, "slug" | "title" | "topic" | "pattern" | "link"> & {
   updatedAt?: string;
 };
-

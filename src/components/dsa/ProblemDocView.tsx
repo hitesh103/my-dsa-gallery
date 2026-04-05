@@ -1,4 +1,5 @@
 import { ComplexityBadge } from "@/components/dsa/ComplexityBadge";
+import { MermaidDiagram } from "@/components/dsa/MermaidDiagram";
 import { Markdown } from "@/components/dsa/Markdown";
 import { QuickRevision } from "@/components/dsa/QuickRevision";
 import type { ProblemDoc } from "@/lib/problemDoc";
@@ -40,6 +41,12 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       <Markdown>{c.brute.intuitionMd}</Markdown>
       <h3>Approach</h3>
       <Markdown>{c.brute.approachMd}</Markdown>
+      {c.brute.mermaid ? (
+        <>
+          <h3>Visualization</h3>
+          <MermaidDiagram diagram={c.brute.mermaid} />
+        </>
+      ) : null}
       <h3>Code (Java)</h3>
       <Markdown>{javaFence(c.brute.codeJava)}</Markdown>
       <ComplexityBadge time={c.brute.time} space={c.brute.space} className="mt-3" />
@@ -51,6 +58,12 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       <Markdown>{c.optimal.intuitionMd}</Markdown>
       <h3>Approach</h3>
       <Markdown>{c.optimal.approachMd}</Markdown>
+      {c.optimal.mermaid ? (
+        <>
+          <h3>Visualization</h3>
+          <MermaidDiagram diagram={c.optimal.mermaid} />
+        </>
+      ) : null}
       <h3>Code (Java)</h3>
       <Markdown>{javaFence(c.optimal.codeJava)}</Markdown>
       <ComplexityBadge time={c.optimal.time} space={c.optimal.space} className="mt-3" />
@@ -61,4 +74,3 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
     </>
   );
 }
-
