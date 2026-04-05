@@ -30,8 +30,8 @@ export type ProblemContent = {
 
 export type FlowNode = {
   id: string;
-  type?: string;
-  data?: Record<string, unknown>;
+  type?: "array" | "linkedList" | "tree" | "graph" | "matrix" | string;
+  data?: FlowNodeData;
   position: { x: number; y: number };
   style?: Record<string, unknown>;
   className?: string;
@@ -41,14 +41,65 @@ export type FlowNode = {
   height?: number;
 };
 
+export type FlowNodeData = 
+  | {
+      type?: "array";
+      label?: string;
+      index?: number;
+      value?: string | number;
+      highlight?: "default" | "active" | "comparing" | "swapped" | "done";
+      extra?: string;
+    }
+  | {
+      type?: "linkedList";
+      value?: string | number;
+      nextPointer?: boolean;
+      randomPointer?: boolean;
+      highlight?: "default" | "new" | "modified" | "traversed";
+      nextLabel?: string;
+      randomLabel?: string;
+    }
+  | {
+      type?: "tree";
+      value?: string | number;
+      highlight?: "default" | "current" | "left" | "right" | "visited" | "new";
+      leftLabel?: string;
+      rightLabel?: string;
+    }
+  | {
+      type?: "graph";
+      label?: string;
+      value?: string | number;
+      highlight?: "default" | "source" | "target" | "visited" | "path" | "new";
+      weight?: string | number;
+    }
+  | {
+      type?: "matrix";
+      value?: string | number;
+      row?: number;
+      col?: number;
+      highlight?: "default" | "row" | "col" | "cell" | "path" | "swap";
+      label?: string;
+    }
+  | Record<string, unknown>;
+
 export type FlowEdge = {
   id: string;
   source: string;
   target: string;
-  type?: string;
+  sourceHandle?: string;
+  targetHandle?: string;
+  type?: "bezier" | "straight" | string;
   label?: string;
   animated?: boolean;
+  data?: FlowEdgeData;
   style?: Record<string, unknown>;
+};
+
+export type FlowEdgeData = {
+  type?: "next" | "random" | "left" | "right" | "parent" | "child" | "edge" | "undirected";
+  weight?: string | number;
+  highlight?: "default" | "active" | "path" | "visited" | "new";
 };
 
 export type FlowVisualizationStep = {

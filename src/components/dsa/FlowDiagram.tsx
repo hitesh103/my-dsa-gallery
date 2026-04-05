@@ -4,8 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState } from "reactflow";
 
-import type { FlowVisualization, FlowNode, FlowEdge, FlowVisualizationStep } from "@/lib/problemDoc";
+import type { FlowVisualization, FlowNode, FlowEdge, FlowVisualizationStep, FlowNodeData, FlowEdgeData } from "@/lib/problemDoc";
 import { cn } from "@/lib/cn";
+import { nodeTypes } from "./nodes/DataStructureNodes";
+import { edgeTypes } from "./nodes/StyledEdges";
 
 type ColorMode = "light" | "dark";
 
@@ -17,6 +19,73 @@ function normalizeStep(step: FlowVisualizationStep | null | undefined): FlowVisu
   if (!step) return null;
   if (!Array.isArray(step.nodes) || !Array.isArray(step.edges)) return null;
   return step;
+}
+
+type LegendItem = {
+  color: string;
+  label: string;
+  dashed?: boolean;
+};
+
+function Legend({ items, isDark }: { items: LegendItem[]; isDark: boolean }) {
+  if (items.length === 0) return null;
+
+  return (
+    <div className="mb-3 flex flex-wrap items-center justify-center gap-4 text-xs">
+      {items.map((item, idx) => (
+        <div key={idx} className="flex items-center gap-1.5">
+          <svg width="24" height="12" className="overflow-visible">
+            <line
+              x1="0"
+              y1="6"
+              x2="24"
+              y2="6"
+              stroke={item.color}
+              strokeWidth="2"
+              strokeDasharray={item.dashed ? "4,3" : undefined}
+            />
+          </svg>
+          <span className="text-muted-foreground">{item.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function extractLegendItems(steps: FlowVisualizationStep[], currentStep: number): LegendItem[] {
+  const step = steps[currentStep];
+  if (!step) return [];
+
+  const items: LegendItem[] = [];
+  const edgeTypes = new Set<string>();
+
+  for (const edge of step.edges) {
+    const type = edge.data?.type;
+    if (type && !edgeTypes.has(type)) {
+      edgeTypes.add(type);
+      
+      switch (type) {
+        case "next":
+          items.push({ color: "rgb(37 99 235)", label: "Next pointer" });
+          break;
+        case "random":
+          items.push({ color: "rgb(147 51 234)", label: "Random pointer", dashed: true });
+          break;
+        case "left":
+          items.push({ color: "rgb(22 163 74)", label: "Left child" });
+          break;
+        case "right":
+          items.push({ color: "rgb(220 38 38)", label: "Right child" });
+          break;
+        case "edge":
+        case "undirected":
+          items.push({ color: "rgb(75 85 99)", label: "Edge" });
+          break;
+      }
+    }
+  }
+
+  return items;
 }
 
 export function FlowDiagram({
@@ -55,26 +124,54 @@ export function FlowDiagram({
     const step = steps[currentStep];
     if (!step) return;
 
-    const mappedNodes = step.nodes.map((n: FlowNode) => ({
-      id: n.id,
-      type: n.type || "default",
-      data: n.data || { label: n.id },
-      position: n.position,
-      style: n.style,
-      className: n.className,
-      draggable: n.draggable ?? false,
-      selectable: n.selectable ?? false,
-    }));
+    const mappedNodes = step.nodes.map((n: FlowNode) => {
+      const nodeType = n.type || "default";
+      const defaultData: FlowNodeData = { label: n.id };
+      const mergedData = { ...defaultData, ...n.data };
 
-    const mappedEdges = step.edges.map((e: FlowEdge) => ({
-      id: e.id,
-      source: e.source,
-      target: e.target,
-      type: e.type || "default",
-      label: e.label,
-      animated: e.animated,
-      style: e.style,
-    }));
+      return {
+        id: n.id,
+        type: nodeType,
+        data: mergedData,
+        position: n.position,
+        style: n.style,
+        className: n.className,
+        draggable: n.draggable ?? false,
+        selectable: n.selectable ?? true,
+      };
+    });
+
+    const mappedEdges = step.edges.map((e: FlowEdge) => {
+      const edgeData: FlowEdgeData = {};
+      if (e.data) {
+        edgeData.type = e.data.type;
+        edgeData.weight = e.data.weight;
+        edgeData.highlight = e.data.highlight;
+      } else {
+        if (e.label?.toLowerCase().includes("next")) {
+          edgeData.type = "next";
+        } else if (e.label?.toLowerCase().includes("random")) {
+          edgeData.type = "random";
+        } else if (e.label?.toLowerCase().includes("left")) {
+          edgeData.type = "left";
+        } else if (e.label?.toLowerCase().includes("right")) {
+          edgeData.type = "right";
+        }
+      }
+
+      return {
+        id: e.id,
+        source: e.source,
+        target: e.target,
+        sourceHandle: e.sourceHandle,
+        targetHandle: e.targetHandle,
+        type: e.type || "bezier",
+        label: e.label,
+        animated: e.animated,
+        data: edgeData,
+        style: e.style,
+      };
+    });
 
     setNodes(mappedNodes);
     setEdges(mappedEdges);
@@ -97,6 +194,7 @@ export function FlowDiagram({
   const border = isDark ? "rgba(255,255,255,0.10)" : "rgba(24,24,27,0.10)";
   const step = steps[currentStep];
   const hasMultipleSteps = steps.length > 1;
+  const legendItems = extractLegendItems(steps, currentStep);
 
   return (
     <div
@@ -161,25 +259,30 @@ export function FlowDiagram({
           </button>
         </div>
       )}
-      <div className="h-[360px] w-full" style={{ background: bg }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          fitView
-          defaultViewport={step.viewport as { x: number; y: number; zoom: number } | undefined}
-          nodesDraggable={false}
-          nodesConnectable={false}
-          elementsSelectable={false}
-          panOnDrag
-          zoomOnScroll
-          proOptions={{ hideAttribution: true }}
-        >
-          <Background gap={18} size={1} />
-          <MiniMap pannable zoomable />
-          <Controls showInteractive={false} />
-        </ReactFlow>
+      <div className="p-4" style={{ borderColor: border }}>
+        {legendItems.length > 0 && <Legend items={legendItems} isDark={isDark} />}
+        <div className="h-[360px] w-full overflow-hidden rounded-lg" style={{ background: bg }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            fitView
+            defaultViewport={step.viewport as { x: number; y: number; zoom: number } | undefined}
+            nodesDraggable={false}
+            nodesConnectable={false}
+            elementsSelectable={true}
+            panOnDrag
+            zoomOnScroll
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            proOptions={{ hideAttribution: true }}
+          >
+            <Background gap={18} size={1} />
+            <MiniMap pannable zoomable />
+            <Controls showInteractive={false} />
+          </ReactFlow>
+        </div>
       </div>
     </div>
   );
