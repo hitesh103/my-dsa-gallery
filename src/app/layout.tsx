@@ -24,8 +24,11 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur">
           <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
-            <NextLink href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-              <span>My DSA Gallery</span>
+            <NextLink
+              href="/"
+              className="flex items-center gap-2 font-semibold tracking-tight"
+            >
+              <span>my dsa gallery</span>
               <HeartIcon className="h-4 w-4 text-muted-foreground" />
             </NextLink>
             <nav className="flex items-center gap-4 text-sm text-muted-foreground">
