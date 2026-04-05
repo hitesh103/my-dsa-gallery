@@ -22,7 +22,17 @@ function defaultPayload(): ProblemDoc {
       brute: {
         intuitionMd: "Intuition for brute force.",
         approachMd: "Approach steps for brute force.",
-        mermaid: "flowchart TD\n  A[Start] --> B[Brute]\n  B --> C[Answer]\n",
+        visualization: {
+          nodes: [
+            { id: "A", position: { x: 0, y: 0 }, data: { label: "Start" } },
+            { id: "B", position: { x: 180, y: 0 }, data: { label: "Brute" } },
+            { id: "C", position: { x: 360, y: 0 }, data: { label: "Answer" } }
+          ],
+          edges: [
+            { id: "eAB", source: "A", target: "B" },
+            { id: "eBC", source: "B", target: "C" }
+          ]
+        },
         codeJava: "public class Solution {\n}\n",
         time: "O(?)",
         space: "O(?)",
@@ -31,7 +41,17 @@ function defaultPayload(): ProblemDoc {
       optimal: {
         intuitionMd: "Intuition for optimal.",
         approachMd: "Approach steps for optimal.",
-        mermaid: "flowchart TD\n  A[Start] --> B[Optimal]\n  B --> C[Answer]\n",
+        visualization: {
+          nodes: [
+            { id: "A", position: { x: 0, y: 0 }, data: { label: "Start" } },
+            { id: "B", position: { x: 180, y: 0 }, data: { label: "Optimal" } },
+            { id: "C", position: { x: 360, y: 0 }, data: { label: "Answer" } }
+          ],
+          edges: [
+            { id: "eAB", source: "A", target: "B" },
+            { id: "eBC", source: "B", target: "C" }
+          ]
+        },
         codeJava: "public class Solution {\n}\n",
         time: "O(?)",
         space: "O(?)",

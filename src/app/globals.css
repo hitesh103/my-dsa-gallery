@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@import "reactflow/dist/style.css";
 
 /* Use class-based dark mode (html.dark) instead of media queries */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -47,6 +48,50 @@ body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
+}
+
+/* React Flow: match minimalist zinc theme */
+.react-flow {
+  --rf-background-color: hsl(var(--background));
+  --rf-controls-button-color: hsl(var(--foreground));
+  --rf-controls-button-bg-color: hsl(var(--card));
+  --rf-controls-button-bg-color-hover: hsl(var(--muted));
+  --rf-minimap-background-color: hsl(var(--card));
+  --rf-minimap-mask-color: rgba(0, 0, 0, 0.12);
+  --rf-minimap-node-color: rgba(24, 24, 27, 0.35);
+}
+
+:root.dark .react-flow {
+  --rf-minimap-mask-color: rgba(255, 255, 255, 0.10);
+  --rf-minimap-node-color: rgba(244, 244, 245, 0.20);
+}
+
+.react-flow__node {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: 12px;
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.react-flow__node.selected {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+.react-flow__edge-path,
+.react-flow__connection-path {
+  stroke: hsl(var(--muted-foreground));
+  stroke-width: 1.5;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: hsl(var(--foreground));
+}
+
+.react-flow__controls-button {
+  border-color: hsl(var(--border));
 }
 
 @layer base {

@@ -7,7 +7,7 @@ export type ProblemContent = {
   brute: {
     intuitionMd: string;
     approachMd: string;
-    mermaid?: string;
+    visualization?: FlowVisualization | null;
     codeJava: string;
     time: string;
     space: string;
@@ -16,7 +16,7 @@ export type ProblemContent = {
   optimal: {
     intuitionMd: string;
     approachMd: string;
-    mermaid?: string;
+    visualization?: FlowVisualization | null;
     codeJava: string;
     time: string;
     space: string;
@@ -26,6 +26,31 @@ export type ProblemContent = {
     brute: string[];
     optimal: string[];
   };
+};
+
+export type FlowVisualization = {
+  nodes: Array<{
+    id: string;
+    type?: string;
+    data?: Record<string, unknown>;
+    position: { x: number; y: number };
+    style?: Record<string, unknown>;
+    className?: string;
+    draggable?: boolean;
+    selectable?: boolean;
+    width?: number;
+    height?: number;
+  }>;
+  edges: Array<{
+    id: string;
+    source: string;
+    target: string;
+    type?: string;
+    label?: string;
+    animated?: boolean;
+    style?: Record<string, unknown>;
+  }>;
+  viewport?: { x: number; y: number; zoom: number };
 };
 
 export type ProblemDoc = {

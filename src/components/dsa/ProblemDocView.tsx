@@ -1,5 +1,5 @@
 import { ComplexityBadge } from "@/components/dsa/ComplexityBadge";
-import { MermaidDiagram } from "@/components/dsa/MermaidDiagram";
+import { FlowDiagram } from "@/components/dsa/FlowDiagram";
 import { Markdown } from "@/components/dsa/Markdown";
 import { QuickRevision } from "@/components/dsa/QuickRevision";
 import type { ProblemDoc } from "@/lib/problemDoc";
@@ -41,10 +41,10 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       <Markdown>{c.brute.intuitionMd}</Markdown>
       <h3>Approach</h3>
       <Markdown>{c.brute.approachMd}</Markdown>
-      {c.brute.mermaid ? (
+      {c.brute.visualization ? (
         <>
           <h3>Visualization</h3>
-          <MermaidDiagram diagram={c.brute.mermaid} />
+          <FlowDiagram visualization={c.brute.visualization} />
         </>
       ) : null}
       <h3>Code (Java)</h3>
@@ -58,10 +58,10 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       <Markdown>{c.optimal.intuitionMd}</Markdown>
       <h3>Approach</h3>
       <Markdown>{c.optimal.approachMd}</Markdown>
-      {c.optimal.mermaid ? (
+      {c.optimal.visualization ? (
         <>
           <h3>Visualization</h3>
-          <MermaidDiagram diagram={c.optimal.mermaid} />
+          <FlowDiagram visualization={c.optimal.visualization} />
         </>
       ) : null}
       <h3>Code (Java)</h3>

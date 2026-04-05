@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import type { ProblemContent, ProblemDoc } from "@/lib/problemDoc";
+import type { FlowVisualization, ProblemContent, ProblemDoc } from "@/lib/problemDoc";
 
 type ApiGet = { problem: ProblemDoc } | { error: string };
 
@@ -18,7 +18,7 @@ function emptyContent(): ProblemContent {
     brute: {
       intuitionMd: "",
       approachMd: "",
-      mermaid: "",
+      visualization: null,
       codeJava: "",
       time: "",
       space: "",
@@ -27,7 +27,7 @@ function emptyContent(): ProblemContent {
     optimal: {
       intuitionMd: "",
       approachMd: "",
-      mermaid: "",
+      visualization: null,
       codeJava: "",
       time: "",
       space: "",
@@ -47,6 +47,8 @@ function lines(value: string) {
 export function ProblemEditorClient({ slug }: { slug: string }) {
   const [status, setStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bruteVizText, setBruteVizText] = useState("");
+  const [optimalVizText, setOptimalVizText] = useState("");
   const [doc, setDoc] = useState<ProblemDoc>({
     slug,
     title: "",
@@ -99,6 +101,13 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
     };
     void load();
   }, [slug]);
+
+  useEffect(() => {
+    if (loading) return;
+    setBruteVizText(doc.content.brute.visualization ? JSON.stringify(doc.content.brute.visualization, null, 2) : "");
+    setOptimalVizText(doc.content.optimal.visualization ? JSON.stringify(doc.content.optimal.visualization, null, 2) : "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading]);
 
   const onSave = async () => {
     setStatus(null);
@@ -352,17 +361,29 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted-foreground">
-                Visualization (Mermaid)
+                Visualization (React Flow JSON)
               </span>
               <textarea
-                value={doc.content.brute.mermaid ?? ""}
-                onChange={(e) =>
-                  updateContent({ brute: { ...doc.content.brute, mermaid: e.target.value } })
-                }
-                rows={8}
+                value={bruteVizText}
+                onChange={(e) => setBruteVizText(e.target.value)}
+                onBlur={() => {
+                  const raw = bruteVizText.trim();
+                  if (!raw) {
+                    updateContent({ brute: { ...doc.content.brute, visualization: null } });
+                    return;
+                  }
+                  try {
+                    const parsed = JSON.parse(raw) as FlowVisualization;
+                    updateContent({ brute: { ...doc.content.brute, visualization: parsed } });
+                    setStatus("Visualization updated.");
+                  } catch {
+                    setStatus("Brute visualization JSON is invalid (not saved).");
+                  }
+                }}
+                rows={10}
                 spellCheck={false}
                 className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
-                placeholder={"flowchart TD\n  A[Start] --> B[...]\n"}
+                placeholder={'{"nodes":[{"id":"A","position":{"x":0,"y":0},"data":{"label":"Start"}}],"edges":[]}'}
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -449,19 +470,29 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted-foreground">
-                Visualization (Mermaid)
+                Visualization (React Flow JSON)
               </span>
               <textarea
-                value={doc.content.optimal.mermaid ?? ""}
-                onChange={(e) =>
-                  updateContent({
-                    optimal: { ...doc.content.optimal, mermaid: e.target.value },
-                  })
-                }
-                rows={8}
+                value={optimalVizText}
+                onChange={(e) => setOptimalVizText(e.target.value)}
+                onBlur={() => {
+                  const raw = optimalVizText.trim();
+                  if (!raw) {
+                    updateContent({ optimal: { ...doc.content.optimal, visualization: null } });
+                    return;
+                  }
+                  try {
+                    const parsed = JSON.parse(raw) as FlowVisualization;
+                    updateContent({ optimal: { ...doc.content.optimal, visualization: parsed } });
+                    setStatus("Visualization updated.");
+                  } catch {
+                    setStatus("Optimal visualization JSON is invalid (not saved).");
+                  }
+                }}
+                rows={10}
                 spellCheck={false}
                 className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
-                placeholder={"flowchart TD\n  A[Start] --> B[...]\n"}
+                placeholder={'{"nodes":[{"id":"A","position":{"x":0,"y":0},"data":{"label":"Start"}}],"edges":[]}'}
               />
             </label>
             <label className="flex flex-col gap-1">
