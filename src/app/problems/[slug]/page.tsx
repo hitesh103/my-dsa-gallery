@@ -3,9 +3,7 @@ import { notFound } from "next/navigation";
 import { ProblemDocView } from "@/components/dsa/ProblemDocView";
 import { Badge } from "@/components/ui/Badge";
 import { Prose } from "@/components/ui/Prose";
-import { getProblemBySlug } from "@/lib/problems";
 import { getProblem as getD1Problem } from "@/lib/problemStore";
-import { githubEditUrl } from "@/lib/site";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
 import { StudyImages } from "./StudyImages";
 
@@ -15,28 +13,33 @@ export default async function ProblemPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  let d1Problem = null as Awaited<ReturnType<typeof getD1Problem>>;
+  let d1Problem: Awaited<ReturnType<typeof getD1Problem>> = null;
   try {
     d1Problem = await getD1Problem(slug);
-  } catch {
-    // D1 not configured or unavailable; fall back to MDX.
+  } catch (e) {
+    const message = e instanceof Error ? e.message : "Unknown error";
+    return (
+      <main className="mx-auto w-full max-w-3xl px-4 py-10">
+        <div className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
+          <div className="font-medium text-foreground">D1 not configured</div>
+          <div className="mt-1">{message}</div>
+          <div className="mt-3 text-xs">
+            Bind your D1 database as <code>DB</code> and redeploy, then seed
+            from <code>/admin</code>.
+          </div>
+        </div>
+      </main>
+    );
   }
+  if (!d1Problem) notFound();
 
-  const problem = d1Problem ? null : await getProblemBySlug(slug);
-  if (!d1Problem && !problem) notFound();
-
-  const meta = d1Problem
-    ? {
-        slug: d1Problem.slug,
-        title: d1Problem.title,
-        topic: d1Problem.topic,
-        pattern: d1Problem.pattern,
-        link: d1Problem.link,
-      }
-    : problem!.meta;
-
-  const editUrl = githubEditUrl(`src/content/${meta.slug}.mdx`);
-  const Content = problem?.Content;
+  const meta = {
+    slug: d1Problem.slug,
+    title: d1Problem.title,
+    topic: d1Problem.topic,
+    pattern: d1Problem.pattern,
+    link: d1Problem.link,
+  };
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-10">
@@ -60,25 +63,11 @@ export default async function ProblemPage({
           >
             Edit in App
           </a>
-          {editUrl ? (
-            <a
-              href={editUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
-            >
-              Edit Content
-            </a>
-          ) : null}
         </div>
       </div>
-      {d1Problem ? (
-        <Prose>
-          <ProblemDocView problem={d1Problem} />
-        </Prose>
-      ) : (
-        Content ? <Content /> : null
-      )}
+      <Prose>
+        <ProblemDocView problem={d1Problem} />
+      </Prose>
       <StudyImages slug={slug} />
     </main>
   );

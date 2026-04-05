@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import type { ProblemMeta } from "@/lib/problems";
+import type { ProblemMeta } from "@/lib/problemDoc";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
 
 function uniqSorted(items: string[]) {

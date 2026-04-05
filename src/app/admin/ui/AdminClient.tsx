@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { ProblemMeta } from "@/lib/problemDoc";
 import { clearAdminToken, getAdminToken, setAdminToken } from "@/lib/adminToken";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
+import { JsonProblemEditor } from "./JsonProblemEditor";
 
 type ApiProblems = { problems: ProblemMeta[] } | { error: string };
 
@@ -52,7 +53,7 @@ export function AdminClient() {
       return;
     }
     setAdminToken(t);
-    setStatus("Saved token in this browser.");
+    setStatus("Saved token in this browser (you only need to do this once per browser).");
   };
 
   const onSeed = async () => {
@@ -101,12 +102,6 @@ export function AdminClient() {
             >
               Seed initial problems
             </button>
-            <Link
-              href="/admin/problems/new"
-              className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
-            >
-              New problem
-            </Link>
             <button
               type="button"
               onClick={refresh}
@@ -129,57 +124,63 @@ export function AdminClient() {
               <li>
                 Set <code>ADMIN_TOKEN</code> as a secret in Cloudflare Pages/Workers env.
               </li>
+              <li>Token is stored in your browser localStorage after you click “Save token”.</li>
             </ul>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-3">
-            <span>Problems</span>
-            <span className="text-xs font-normal text-muted-foreground">
-              {problems.length} item{problems.length === 1 ? "" : "s"}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {problems.length === 0 ? (
-            <div className="text-sm text-muted-foreground">
-              No problems found in D1 yet. Click “Seed initial problems”.
-            </div>
-          ) : (
-            <ul className="divide-y">
-              {problems.map((p) => (
-                <li key={p.slug} className="py-4">
-                  <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <div className="font-medium">{p.title}</div>
-                    <div className="text-xs text-muted-foreground">{p.slug}</div>
-                  </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    <Badge tone={toneForTopic(p.topic)}>{p.topic}</Badge>
-                    <Badge tone={toneForPattern(p.pattern)}>{p.pattern}</Badge>
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Link
-                      href={`/admin/problems/${p.slug}`}
-                      className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
-                    >
-                      Edit
-                    </Link>
-                    <Link
-                      href={`/problems/${p.slug}`}
-                      className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
-                    >
-                      View
-                    </Link>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </CardContent>
-      </Card>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>JSON Editor</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <JsonProblemEditor token={token} onStatus={(m) => setStatus(m)} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-3">
+              <span>Problems</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                {problems.length} item{problems.length === 1 ? "" : "s"}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {problems.length === 0 ? (
+              <div className="text-sm text-muted-foreground">
+                No problems found in D1 yet. Click “Seed initial problems”.
+              </div>
+            ) : (
+              <ul className="divide-y">
+                {problems.map((p) => (
+                  <li key={p.slug} className="py-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <div className="font-medium">{p.title}</div>
+                      <div className="text-xs text-muted-foreground">{p.slug}</div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <Badge tone={toneForTopic(p.topic)}>{p.topic}</Badge>
+                      <Badge tone={toneForPattern(p.pattern)}>{p.pattern}</Badge>
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <Link
+                        href={`/problems/${p.slug}`}
+                        className="inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium hover:bg-muted"
+                      >
+                        View
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
