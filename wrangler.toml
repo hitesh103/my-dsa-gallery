@@ -2,7 +2,6 @@ name = "my-dsa-hub"
 main = ".open-next/worker.js"
 compatibility_date = "2025-01-01"
 compatibility_flags = ["nodejs_compat"]
-migrations_dir = "migrations"
 
 [assets]
 directory = ".open-next/assets"
@@ -16,3 +15,4 @@ binding = "ASSETS"
 # binding = "DB"
 # database_name = "my-dsa-gallery"
 # database_id = "PASTE_DATABASE_ID_HERE"
+# migrations_dir = "migrations"
