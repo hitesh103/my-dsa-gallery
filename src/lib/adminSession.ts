@@ -98,7 +98,8 @@ export async function setPasswordOnce(setupKey: string, password: string) {
 
   const salt = new Uint8Array(16);
   crypto.getRandomValues(salt);
-  const iter = 200_000;
+  // Cloudflare Workers PBKDF2 currently caps iterations at 100_000.
+  const iter = 100_000;
   const hash = await pbkdf2Sha256(password, salt, iter);
 
   const record: PasswordRecord = {
