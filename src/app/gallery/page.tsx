@@ -1,7 +1,7 @@
 import { listImages } from "@/lib/images";
 
 import { UploadClient } from "./UploadClient";
-import { ImageDeleteButton } from "@/components/gallery/ImageDeleteButton";
+import { ImageFigureClient } from "@/components/gallery/ImageFigureClient";
 
 export const dynamic = "force-dynamic";
 
@@ -43,17 +43,17 @@ export default async function GalleryPage() {
 
       <div className="mt-8 columns-1 gap-4 sm:columns-2 lg:columns-3">
         {images.map((img) => (
-          <figure
+          <div
             key={img.key}
-            className="mb-4 break-inside-avoid overflow-hidden rounded-xl border bg-card"
+            className="mb-4 break-inside-avoid"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={img.url} alt={img.key} className="h-auto w-full" loading="lazy" />
-            <figcaption className="flex items-center justify-between gap-2 border-t px-3 py-2 text-xs text-muted-foreground">
-              <span className="truncate">{img.key.replace(/^gallery\//, "")}</span>
-              <ImageDeleteButton imageKey={img.key} />
-            </figcaption>
-          </figure>
+            <ImageFigureClient
+              url={img.url}
+              alt={img.key}
+              caption={img.key.replace(/^gallery\//, "")}
+              imageKey={img.key}
+            />
+          </div>
         ))}
       </div>
     </main>
