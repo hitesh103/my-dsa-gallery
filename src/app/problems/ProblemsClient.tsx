@@ -1,7 +1,7 @@
 "use client";
 
 import NextLink from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
@@ -16,6 +16,26 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
   const [q, setQ] = useState("");
   const [topic, setTopic] = useState<string>("all");
   const [pattern, setPattern] = useState<string>("all");
+  const [view, setView] = useState<"grouped" | "board" | "list">("grouped");
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("problemsView");
+      if (stored === "grouped" || stored === "board" || stored === "list") {
+        setView(stored);
+      }
+    } catch {
+      // no-op
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("problemsView", view);
+    } catch {
+      // no-op
+    }
+  }, [view]);
 
   const topics = useMemo(() => uniqSorted(problems.map((p) => p.topic)), [problems]);
   const patterns = useMemo(
@@ -51,6 +71,10 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [filtered]);
 
+  const ordered = useMemo(() => {
+    return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
+  }, [filtered]);
+
   const onClear = () => {
     setQ("");
     setTopic("all");
@@ -60,19 +84,46 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
   return (
     <div className="mt-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between gap-3">
-            <span>Search</span>
-            <span className="text-xs font-normal text-muted-foreground">
-              {filtered.length} result{filtered.length === 1 ? "" : "s"}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 md:grid-cols-3">
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Query</span>
-              <input
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between gap-3">
+              <span>Search</span>
+              <span className="text-xs font-normal text-muted-foreground">
+                {filtered.length} result{filtered.length === 1 ? "" : "s"}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                View:
+                <button
+                  type="button"
+                  onClick={() => setView("grouped")}
+                  className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "grouped" ? "bg-muted text-foreground" : ""}`}
+                >
+                  Grouped
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("board")}
+                  className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "board" ? "bg-muted text-foreground" : ""}`}
+                >
+                  Board
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setView("list")}
+                  className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "list" ? "bg-muted text-foreground" : ""}`}
+                >
+                  List
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-3">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Query</span>
+                <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search title, topic, pattern…"
@@ -126,23 +177,78 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
               </button>
             ) : null}
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
-        {grouped.map(([t, list]) => (
-          <Card key={t}>
+      {view === "grouped" ? (
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          {grouped.map(([t, list]) => (
+            <Card key={t}>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between gap-3">
+                  <span>{t}</span>
+                  <Badge tone={toneForTopic(t)}>{list.length}</Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-3 text-sm">
+                  {list.map((p) => (
+                    <li key={p.slug} className="flex flex-col gap-2">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <NextLink
+                          href={`/problems/${p.slug}`}
+                          className="font-medium underline underline-offset-4 decoration-zinc-300 hover:decoration-zinc-800 dark:decoration-zinc-700 dark:hover:decoration-zinc-200"
+                        >
+                          {p.title}
+                        </NextLink>
+                        <span className="text-xs text-muted-foreground">{p.slug}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge tone={toneForTopic(p.topic)}>{p.topic}</Badge>
+                        <Badge tone={toneForPattern(p.pattern)}>{p.pattern}</Badge>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : view === "board" ? (
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {ordered.map((p) => (
+            <Card key={p.slug} className="hover:bg-muted/40 transition-colors">
+              <CardHeader>
+                <CardTitle className="text-base">
+                  <NextLink
+                    href={`/problems/${p.slug}`}
+                    className="underline underline-offset-4 decoration-zinc-300 hover:decoration-zinc-800 dark:decoration-zinc-700 dark:hover:decoration-zinc-200"
+                  >
+                    {p.title}
+                  </NextLink>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  <Badge tone={toneForTopic(p.topic)}>{p.topic}</Badge>
+                  <Badge tone={toneForPattern(p.pattern)}>{p.pattern}</Badge>
+                </div>
+                <div className="mt-3 text-xs text-muted-foreground">{p.slug}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="mt-6">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between gap-3">
-                <span>{t}</span>
-                <Badge tone={toneForTopic(t)}>{list.length}</Badge>
-              </CardTitle>
+              <CardTitle>All Problems</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="space-y-3 text-sm">
-                {list.map((p) => (
-                  <li key={p.slug} className="flex flex-col gap-2">
-                    <div className="flex items-baseline justify-between gap-3">
+              <ul className="divide-y">
+                {ordered.map((p) => (
+                  <li key={p.slug} className="py-4">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
                       <NextLink
                         href={`/problems/${p.slug}`}
                         className="font-medium underline underline-offset-4 decoration-zinc-300 hover:decoration-zinc-800 dark:decoration-zinc-700 dark:hover:decoration-zinc-200"
@@ -151,7 +257,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                       </NextLink>
                       <span className="text-xs text-muted-foreground">{p.slug}</span>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="mt-2 flex flex-wrap gap-2">
                       <Badge tone={toneForTopic(p.topic)}>{p.topic}</Badge>
                       <Badge tone={toneForPattern(p.pattern)}>{p.pattern}</Badge>
                     </div>
@@ -160,9 +266,8 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
               </ul>
             </CardContent>
           </Card>
-        ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
-
