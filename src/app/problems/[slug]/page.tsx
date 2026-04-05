@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Prose } from "@/components/ui/Prose";
 import { getProblem as getD1Problem } from "@/lib/problemStore";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
+import { Comments } from "./Comments";
 import { StudyImages } from "./StudyImages";
 
 export default async function ProblemPage({
@@ -69,6 +70,7 @@ export default async function ProblemPage({
         <ProblemDocView problem={d1Problem} />
       </Prose>
       <StudyImages slug={slug} />
+      <Comments slug={slug} />
     </main>
   );
 }
