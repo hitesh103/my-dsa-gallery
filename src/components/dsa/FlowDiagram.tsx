@@ -165,6 +165,8 @@ export function FlowDiagram({
         target: e.target,
         sourceHandle: e.sourceHandle,
         targetHandle: e.targetHandle,
+        sourcePosition: e.sourcePosition,
+        targetPosition: e.targetPosition,
         type: e.type || "bezier",
         label: e.label,
         animated: e.animated,

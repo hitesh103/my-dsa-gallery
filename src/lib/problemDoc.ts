@@ -39,6 +39,8 @@ export type FlowNode = {
   selectable?: boolean;
   width?: number;
   height?: number;
+  sourcePosition?: "top" | "bottom" | "left" | "right";
+  targetPosition?: "top" | "bottom" | "left" | "right";
 };
 
 export type FlowNodeData = 
@@ -94,6 +96,8 @@ export type FlowEdge = {
   animated?: boolean;
   data?: FlowEdgeData;
   style?: Record<string, unknown>;
+  sourcePosition?: "top" | "bottom" | "left" | "right";
+  targetPosition?: "top" | "bottom" | "left" | "right";
 };
 
 export type FlowEdgeData = {
