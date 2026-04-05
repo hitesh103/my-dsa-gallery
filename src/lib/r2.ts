@@ -22,10 +22,28 @@ export function getR2Client() {
     region: "auto",
     endpoint,
     forcePathStyle: true,
-    // Avoid Node-only defaults/providers that try to touch the filesystem in workerd.
+    credentials: { accessKeyId, secretAccessKey },
+    /**
+     * OpenNext bundles the server with esbuild `platform: "node"` for workerd.
+     * The AWS SDK node runtime defaults try to read shared config files using `fs.readFile`,
+     * which is not implemented in Cloudflare Workers.
+     *
+     * To avoid that, we pass explicit values for the knobs that would otherwise be
+     * loaded via `@smithy/node-config-provider` (filesystem).
+     */
     defaultsMode: "standard",
     requestHandler: new FetchHttpHandler(),
-    credentials: { accessKeyId, secretAccessKey },
+    authSchemePreference: async () => [],
+    disableS3ExpressSessionAuth: async () => false,
+    maxAttempts: 3,
+    requestChecksumCalculation: async () => "WHEN_REQUIRED",
+    responseChecksumValidation: async () => "WHEN_REQUIRED",
+    retryMode: async () => "standard",
+    sigv4aSigningRegionSet: async () => undefined,
+    useArnRegion: async () => false,
+    useDualstackEndpoint: async () => false,
+    useFipsEndpoint: async () => false,
+    userAgentAppId: async () => undefined,
   });
 
   return cached;
