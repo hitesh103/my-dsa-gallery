@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { errorStatus, requireAdmin } from "@/lib/adminAuth";
 import type { ProblemDoc } from "@/lib/problemDoc";
-import { getProblem, upsertProblem } from "@/lib/problemStore";
+import { deleteProblem, getProblem, upsertProblem } from "@/lib/problemStore";
 
 export async function GET(
   _req: Request,
@@ -36,6 +36,22 @@ export async function PUT(
     }
 
     await upsertProblem(body as ProblemDoc);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    const status = errorStatus(err);
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: message }, { status });
+  }
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ slug: string }> },
+) {
+  const { slug } = await params;
+  try {
+    requireAdmin(req);
+    await deleteProblem(slug);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const status = errorStatus(err);

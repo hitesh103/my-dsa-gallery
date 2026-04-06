@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 
-type D1Prepared = {
+export type D1Prepared = {
   bind: (...values: unknown[]) => {
     first: <T = unknown>() => Promise<T | null>;
     all: <T = unknown>() => Promise<{ results: T[] }>;

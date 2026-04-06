@@ -171,3 +171,8 @@ export async function upsertProblem(problem: ProblemDoc): Promise<void> {
     )
     .run();
 }
+
+export async function deleteProblem(slug: string): Promise<void> {
+  const db = getD1();
+  await db.prepare("DELETE FROM problems WHERE slug = ?").bind(slug).run();
+}
