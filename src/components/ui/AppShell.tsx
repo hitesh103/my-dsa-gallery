@@ -5,6 +5,7 @@ import NextLink from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { CloudIcon, HeartIcon } from "@/components/ui/Icons";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 
 type NavItem = {
   href: string;
@@ -68,6 +69,7 @@ function MobileHeader() {
           <HeartIcon className="h-4 w-4 text-muted-foreground" />
           <span className="text-sm">My DSA Gallery</span>
         </NextLink>
+        <ThemeToggle />
       </div>
     </header>
   );
@@ -84,6 +86,7 @@ function DesktopHeader() {
           <HeartIcon className="h-4 w-4 text-muted-foreground" />
         </NextLink>
         <nav className="flex items-center gap-4 text-sm text-muted-foreground">
+          <ThemeToggle />
           {navItems.map((item) => (
             <NextLink
               key={item.href}
