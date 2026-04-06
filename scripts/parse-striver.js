@@ -28,14 +28,10 @@ const difficultyMap = {
   "3.Hard": "Hard",
 };
 
-const isDifficultyPattern = (name) => {
-  return ["1.Easy", "2.Medium", "3.Hard"].includes(name);
-};
-
 function parseProblem(content, fileName) {
   const questionMatch = content.match(/\/\*[\s\S]*?QUESTION:-([\s\S]*?)\*\//);
   const approachMatch = content.match(/\/\*[\s\S]*?APPROACH:-([\s\S]*?)\*\//);
-  const codeMatch = content.match(/\/\/ CODE:-\s*([\s\S]*?)(?=\/\/ TIME|$)/);
+  const codeMatch = content.match(/\/\/ CODE:-\s*([\s\S]*?)(?=\/\/ TIME|$)/s);
   const timeMatch = content.match(/\/\/ TIME COMPLEXITY\s*=\s*(.+)/i);
   const spaceMatch = content.match(/\/\/ SPACE COMPLEXITY\s*=\s*(.+)/i);
 
@@ -45,7 +41,6 @@ function parseProblem(content, fileName) {
   const time = timeMatch ? timeMatch[1].trim() : "";
   const space = spaceMatch ? spaceMatch[1].trim() : "";
 
-  // Extract title from filename
   const baseName = path.basename(fileName, ".cpp");
   const title = baseName
     .replace(/^\d+\.?\s*/, "")
@@ -53,14 +48,7 @@ function parseProblem(content, fileName) {
     .replace(/\s*&\s*/g, " & ")
     .trim();
 
-  return {
-    title,
-    statement: question,
-    approach,
-    code,
-    time,
-    space,
-  };
+  return { title, statement: question, approach, code, time, space };
 }
 
 function generateSlug(title) {
@@ -72,10 +60,48 @@ function generateSlug(title) {
     .replace(/^-|-$/g, "");
 }
 
+function convertCppToJava(code) {
+  if (!code) return "";
+
+  return code
+    .replace(/\bint\s+main\s*\(/g, "// Main method:")
+    .replace(/\bcout\s*<<\s*/g, "// System.out.println(")
+    .replace(/<<\s*endl/g, "// )")
+    .replace(/;\s*$/gm, ";")
+    .replace(/\bstd::/g, "")
+    .replace(/\bvector</g, "ArrayList<")
+    .replace(/\bstd::vector</g, "ArrayList")
+    .replace(/\bstd::string/g, "String")
+    .replace(/\bstring/g, "String")
+    .replace(/\bbool/g, "boolean")
+    .replace(/\bchar/g, "char")
+    .replace(/\bfloat/g, "float")
+    .replace(/\bdouble/g, "double")
+    .replace(/\bsizeof\s*\(/g, ".size()")
+    .replace(/\.push_back\(/g, ".add(")
+    .replace(/\.pop_back\(/g, ".remove(")
+    .replace(/\.back\(/g, ".get(.size()-1)")
+    .replace(/\.begin\(\)/g, "0")
+    .replace(/\.end\(\)/g, ".size()")
+    .replace(/\.empty\(\)/g, ".isEmpty()")
+    .replace(/\.clear\(\)/g, ".clear()")
+    .replace(/\.insert\(/g, ".add(")
+    .replace(/\.erase\(/g, ".remove(")
+    .replace(/\.find\(/g, ".indexOf(")
+    .replace(/\.count\(/g, ".contains(")
+    .replace(/\.max_element\(/g, "Collections.max(")
+    .replace(/\.min_element\(/g, "Collections.min(")
+    .replace(/\.sort\(/g, "Collections.sort(")
+    .replace(/auto\s+/g, "var ")
+    .replace(/\bnullptr\b/g, "null")
+    .replace(/\btrue\b/g, "true")
+    .replace(/\bfalse\b/g, "false");
+}
+
 const problems = [];
+const seen = new Set();
 
 const topics = Object.keys(topicMap);
-
 for (const topicDir of topics) {
   const topicPath = path.join(repoDir, topicDir);
   if (!fs.existsSync(topicPath)) continue;
@@ -87,7 +113,7 @@ for (const topicDir of topics) {
     const diffPath = path.join(topicPath, diffDir);
     if (!fs.statSync(diffPath).isDirectory()) continue;
 
-    const pattern = isDifficultyPattern(diffDir) ? difficultyMap[diffDir] : diffDir;
+    const pattern = difficultyMap[diffDir] || diffDir;
     const files = fs.readdirSync(diffPath).filter((f) => f.endsWith(".cpp"));
 
     for (const file of files) {
@@ -95,55 +121,70 @@ for (const topicDir of topics) {
       const content = fs.readFileSync(filePath, "utf-8");
       const parsed = parseProblem(content, file);
 
-      const slug = generateSlug(parsed.title);
+      let slug = generateSlug(parsed.title);
+      let counter = 1;
+      while (seen.has(slug)) {
+        slug = generateSlug(parsed.title) + "-" + counter++;
+      }
+      seen.add(slug);
 
-      problems.push({
+      const problem = {
         slug,
         title: parsed.title,
         topic,
         pattern,
-        statement: parsed.statement,
-        approach: parsed.approach,
-        code: parsed.code,
-        time: parsed.time,
-        space: parsed.space,
-      });
+        link: "",
+        content: {
+          statementMd: parsed.statement || `Solve the problem: ${parsed.title}`,
+          inputMd: "",
+          outputMd: "",
+          exampleMd: "",
+          exampleExplanationMd: "",
+          brute: {
+            intuitionMd: parsed.approach
+              ? `Understand the problem and develop a solution approach.\n\n${parsed.approach}`
+              : "",
+            approachMd: parsed.approach || "",
+            visualization: null,
+            codeJava: convertCppToJava(parsed.code),
+            time: parsed.time || "",
+            space: parsed.space || "",
+            complexityExplanationMd: parsed.time
+              ? `Time complexity: ${parsed.time}\nSpace complexity: ${parsed.space}`
+              : "",
+          },
+          optimal: {
+            intuitionMd: "",
+            approachMd: "",
+            visualization: null,
+            codeJava: "",
+            time: "",
+            space: "",
+            complexityExplanationMd: "",
+          },
+          quickRevision: {
+            brute: parsed.approach
+              ? parsed.approach
+                  .split("\n")
+                  .map((line) => line.replace(/^->\s*/, "").trim())
+                  .filter(Boolean)
+                  .slice(0, 5)
+              : [],
+            optimal: [],
+          },
+        },
+      };
+
+      problems.push(problem);
     }
   }
 }
 
-// Remove duplicates by slug
-const seen = new Set();
-const uniqueProblems = problems.filter((p) => {
-  if (seen.has(p.slug)) {
-    return false;
-  }
-  seen.add(p.slug);
-  return true;
-});
-
-console.log(`Parsed ${uniqueProblems.length} unique problems`);
-console.log("\nBy Topic:");
-const byTopic = {};
-for (const p of uniqueProblems) {
-  byTopic[p.topic] = (byTopic[p.topic] || 0) + 1;
-}
-for (const [topic, count] of Object.entries(byTopic)) {
-  console.log(`  ${topic}: ${count}`);
-}
-
-console.log("\nBy Pattern:");
-const byPattern = {};
-for (const p of uniqueProblems) {
-  byPattern[p.pattern] = (byPattern[p.pattern] || 0) + 1;
-}
-for (const [pattern, count] of Object.entries(byPattern)) {
-  console.log(`  ${pattern}: ${count}`);
-}
+console.log(`Generated ${problems.length} problems`);
 
 // Save to JSON
 fs.writeFileSync(
   "/Users/dev/Documents/GitHub/my-dsa-gallery/problems-data.json",
-  JSON.stringify(uniqueProblems, null, 2)
+  JSON.stringify(problems, null, 2)
 );
-console.log("\nSaved to problems-data.json");
+console.log("Saved to problems-data.json");
