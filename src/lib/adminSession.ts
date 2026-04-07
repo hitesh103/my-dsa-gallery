@@ -183,15 +183,23 @@ function parseCookieHeader(cookieHeader: string | null) {
   for (const part of parts) {
     const [k, ...rest] = part.trim().split("=");
     if (!k) continue;
-    out.set(k, rest.join("="));
+    const rawValue = rest.join("=");
+    try {
+      out.set(k, decodeURIComponent(rawValue));
+    } catch {
+      out.set(k, rawValue);
+    }
   }
   return out;
 }
 
+export function getSessionTokenFromCookieHeader(cookieHeader: string | null) {
+  return parseCookieHeader(cookieHeader).get(SESSION_COOKIE) ?? null;
+}
+
 export async function isAdminRequest(req: Request): Promise<boolean> {
   // 1) session cookie (preferred)
-  const cookies = parseCookieHeader(req.headers.get("cookie"));
-  const token = cookies.get(SESSION_COOKIE) ?? null;
+  const token = getSessionTokenFromCookieHeader(req.headers.get("cookie"));
   if (token) {
     const ok = await isValidSessionToken(token);
     if (ok) return true;

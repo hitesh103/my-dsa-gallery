@@ -4,6 +4,7 @@ import { errorStatus } from "@/lib/adminAuth";
 import {
   createSession,
   deleteSession,
+  getSessionTokenFromCookieHeader,
   getSessionCookieName,
   hasPassword,
   isValidSessionToken,
@@ -12,15 +13,7 @@ import {
 
 export async function GET(req: Request) {
   try {
-    const { headers } = req;
-    const cookie = headers.get("cookie") ?? "";
-    const name = getSessionCookieName();
-    const token =
-      cookie
-        .split(";")
-        .map((p) => p.trim())
-        .find((p) => p.startsWith(`${name}=`))
-        ?.slice(name.length + 1) ?? null;
+    const token = getSessionTokenFromCookieHeader(req.headers.get("cookie"));
 
     const loggedIn = token ? await isValidSessionToken(token) : false;
     return NextResponse.json({ hasPassword: await hasPassword(), loggedIn });
@@ -74,13 +67,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const name = getSessionCookieName();
-    const cookie = req.headers.get("cookie") ?? "";
-    const token =
-      cookie
-        .split(";")
-        .map((p) => p.trim())
-        .find((p) => p.startsWith(`${name}=`))
-        ?.slice(name.length + 1) ?? null;
+    const token = getSessionTokenFromCookieHeader(req.headers.get("cookie"));
 
     if (token) await deleteSession(token);
     const res = NextResponse.json({ ok: true });
