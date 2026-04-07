@@ -19,7 +19,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    requireAdmin(req);
+    await requireAdmin(req);
     const body = (await req.json()) as { slug?: string; body?: string };
     const slug = body.slug ?? "";
     const text = body.body ?? "";
@@ -31,4 +31,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status });
   }
 }
-

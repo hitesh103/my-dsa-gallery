@@ -12,6 +12,12 @@ type ProblemRow = {
   updated_at: string;
 };
 
+export type AdminProblemSummary = ProblemMeta & {
+  completenessScore: number;
+  isRevisionReady: boolean;
+  missingParts: string[];
+};
+
 function safeJsonParse<T>(value: string): T {
   return JSON.parse(value) as T;
 }
@@ -52,6 +58,66 @@ function ftsQuery(q: string) {
     .slice(0, 8);
   if (terms.length === 0) return null;
   return terms.map((t) => `"${t}"`).join(" AND ");
+}
+
+function rowToProblem(row: ProblemRow): ProblemDoc {
+  const content = safeJsonParse<ProblemDoc["content"]>(row.content_json);
+  return {
+    slug: row.slug,
+    title: row.title,
+    topic: row.topic,
+    pattern: row.pattern,
+    link: row.link,
+    content,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function nonEmpty(value: string | null | undefined) {
+  return Boolean(value?.trim());
+}
+
+export function toAdminProblemSummary(problem: ProblemDoc): AdminProblemSummary {
+  const checks = [
+    { label: "link", ok: nonEmpty(problem.link) },
+    { label: "statement", ok: nonEmpty(problem.content.statementMd) },
+    { label: "example", ok: nonEmpty(problem.content.exampleMd) },
+    {
+      label: "brute solution",
+      ok:
+        nonEmpty(problem.content.brute.approachMd) &&
+        nonEmpty(problem.content.brute.codeJava),
+    },
+    {
+      label: "optimal solution",
+      ok:
+        nonEmpty(problem.content.optimal.approachMd) &&
+        nonEmpty(problem.content.optimal.codeJava),
+    },
+    {
+      label: "quick revision",
+      ok:
+        (problem.content.quickRevision.brute?.length ?? 0) > 0 ||
+        (problem.content.quickRevision.optimal?.length ?? 0) > 0,
+    },
+  ];
+
+  const completedChecks = checks.filter((check) => check.ok).length;
+  const completenessScore = Math.round((completedChecks / checks.length) * 100);
+  const missingParts = checks.filter((check) => !check.ok).map((check) => check.label);
+
+  return {
+    slug: problem.slug,
+    title: problem.title,
+    topic: problem.topic,
+    pattern: problem.pattern,
+    link: problem.link,
+    updatedAt: problem.updatedAt,
+    completenessScore,
+    isRevisionReady: missingParts.length === 0,
+    missingParts,
+  };
 }
 
 export async function listProblems({
@@ -122,18 +188,81 @@ export async function getProblem(slug: string): Promise<ProblemDoc | null> {
     .first<ProblemRow>();
 
   if (!row) return null;
+  return rowToProblem(row);
+}
 
-  const content = safeJsonParse<ProblemDoc["content"]>(row.content_json);
-  return {
-    slug: row.slug,
-    title: row.title,
-    topic: row.topic,
-    pattern: row.pattern,
-    link: row.link,
-    content,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
+export async function listAdminProblems({
+  q,
+  topic,
+  pattern,
+  limit = 200,
+}: {
+  q?: string;
+  topic?: string;
+  pattern?: string;
+  limit?: number;
+}): Promise<AdminProblemSummary[]> {
+  const db = getD1();
+  const capped = Math.max(1, Math.min(limit, 500));
+
+  const where: string[] = [];
+  const binds: unknown[] = [];
+
+  if (topic && topic !== "all") {
+    where.push("p.topic = ?");
+    binds.push(topic);
+  }
+  if (pattern && pattern !== "all") {
+    where.push("p.pattern = ?");
+    binds.push(pattern);
+  }
+
+  const query = (q ?? "").trim();
+  const match = query ? ftsQuery(query) : null;
+
+  if (match) {
+    const sql = `
+      SELECT
+        p.slug,
+        p.title,
+        p.topic,
+        p.pattern,
+        p.link,
+        p.content_json,
+        p.created_at,
+        p.updated_at
+      FROM problems p
+      JOIN problems_fts f ON f.slug = p.slug
+      WHERE problems_fts MATCH ?
+      ${where.length ? `AND ${where.join(" AND ")}` : ""}
+      ORDER BY p.updated_at DESC
+      LIMIT ?;
+    `;
+
+    const out = await db
+      .prepare(sql)
+      .bind(match, ...binds, capped)
+      .all<ProblemRow>();
+    return out.results.map((row) => toAdminProblemSummary(rowToProblem(row)));
+  }
+
+  const sql = `
+    SELECT
+      p.slug,
+      p.title,
+      p.topic,
+      p.pattern,
+      p.link,
+      p.content_json,
+      p.created_at,
+      p.updated_at
+    FROM problems p
+    ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+    ORDER BY p.updated_at DESC
+    LIMIT ?;
+  `;
+  const out = await db.prepare(sql).bind(...binds, capped).all<ProblemRow>();
+  return out.results.map((row) => toAdminProblemSummary(rowToProblem(row)));
 }
 
 export async function upsertProblem(problem: ProblemDoc): Promise<void> {

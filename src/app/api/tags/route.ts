@@ -1,9 +1,11 @@
+import { errorStatus, requireAdmin } from "@/lib/adminAuth";
 import { listTags, createTag, deleteTag } from "@/lib/tagStore";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
+    await requireAdmin(request);
     const { searchParams } = new URL(request.url);
     const type = searchParams.get("type") as "topic" | "pattern" | null;
     if (type && !["topic", "pattern"].includes(type)) {
@@ -12,13 +14,15 @@ export async function GET(request: Request) {
     const tags = await listTags(type ?? undefined);
     return Response.json({ tags });
   } catch (e) {
+    const status = errorStatus(e);
     const message = e instanceof Error ? e.message : "Unknown error";
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json({ error: message }, { status });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    await requireAdmin(request);
     const body = await request.json() as { name?: string; type?: string };
     const { name, type } = body;
 
@@ -32,13 +36,15 @@ export async function POST(request: Request) {
     const tag = await createTag(name.trim(), type as "topic" | "pattern");
     return Response.json({ ok: true, tag });
   } catch (e) {
+    const status = errorStatus(e);
     const message = e instanceof Error ? e.message : "Unknown error";
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json({ error: message }, { status });
   }
 }
 
 export async function DELETE(request: Request) {
   try {
+    await requireAdmin(request);
     const { searchParams } = new URL(request.url);
     const idStr = searchParams.get("id");
     if (!idStr) {
@@ -51,7 +57,8 @@ export async function DELETE(request: Request) {
     await deleteTag(id);
     return Response.json({ ok: true });
   } catch (e) {
+    const status = errorStatus(e);
     const message = e instanceof Error ? e.message : "Unknown error";
-    return Response.json({ error: message }, { status: 500 });
+    return Response.json({ error: message }, { status });
   }
 }

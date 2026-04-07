@@ -1,6 +1,7 @@
 "use client";
 
 import NextLink from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/Badge";
@@ -22,6 +23,7 @@ function useDebouncedValue<T>(value: T, delayMs: number) {
 }
 
 export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
+  const router = useRouter();
   const [q, setQ] = useState("");
   const [topic, setTopic] = useState<string>("all");
   const [pattern, setPattern] = useState<string>("all");
@@ -133,15 +135,32 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
     setPattern("all");
   };
 
+  const onRandomProblem = () => {
+    if (filtered.length === 0) return;
+    const selected = filtered[Math.floor(Math.random() * filtered.length)];
+    if (!selected) return;
+    router.push(`/problems/${selected.slug}`);
+  };
+
   return (
     <div className="mt-6">
       <Card>
           <CardHeader>
             <CardTitle className="flex items-center justify-between gap-3">
               <span>Search</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                {filtered.length} result{filtered.length === 1 ? "" : "s"}
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onRandomProblem}
+                  disabled={filtered.length === 0}
+                  className="rounded-md border px-2 py-1 text-xs font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Random Revise
+                </button>
+                <span className="text-xs font-normal text-muted-foreground">
+                  {filtered.length} result{filtered.length === 1 ? "" : "s"}
+                </span>
+              </div>
             </CardTitle>
           </CardHeader>
           <CardContent>

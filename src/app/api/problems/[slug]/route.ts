@@ -25,7 +25,7 @@ export async function PUT(
 ) {
   const { slug } = await params;
   try {
-    requireAdmin(req);
+    await requireAdmin(req);
 
     const body = (await req.json()) as Partial<ProblemDoc>;
     if (!body.slug || body.slug !== slug) {
@@ -50,7 +50,7 @@ export async function DELETE(
 ) {
   const { slug } = await params;
   try {
-    requireAdmin(req);
+    await requireAdmin(req);
     await deleteProblem(slug);
     return NextResponse.json({ ok: true });
   } catch (err) {
@@ -59,4 +59,3 @@ export async function DELETE(
     return NextResponse.json({ error: message }, { status });
   }
 }
-

@@ -7,7 +7,7 @@ import { upsertProblem } from "@/lib/problemStore";
 
 export async function POST(req: Request) {
   try {
-    requireAdmin(req);
+    await requireAdmin(req);
 
     const db = getD1();
     const row = await db.prepare("SELECT COUNT(*) as c FROM problems").bind().first<{ c: number }>();
@@ -27,4 +27,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: message }, { status });
   }
 }
-

@@ -28,7 +28,7 @@ function canDeleteKey(key: string) {
 
 export async function DELETE(req: Request) {
   try {
-    requireAdmin(req);
+    await requireAdmin(req);
 
     const { searchParams } = new URL(req.url);
     let key = searchParams.get("key") ?? "";

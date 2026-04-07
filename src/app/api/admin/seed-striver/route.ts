@@ -7,7 +7,7 @@ import type { ProblemDoc } from "@/lib/problemDoc";
 
 export async function POST(req: Request) {
   try {
-    requireAdmin(req);
+    await requireAdmin(req);
 
     const problems = problemsData as ProblemDoc[];
 
