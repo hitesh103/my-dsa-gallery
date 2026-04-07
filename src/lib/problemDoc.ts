@@ -7,6 +7,7 @@ export type ProblemContent = {
   brute: {
     intuitionMd: string;
     approachMd: string;
+    dryRun?: string;
     visualization?: FlowVisualization | null;
     codeJava: string;
     time: string;
@@ -16,6 +17,7 @@ export type ProblemContent = {
   optimal: {
     intuitionMd: string;
     approachMd: string;
+    dryRun?: string;
     visualization?: FlowVisualization | null;
     codeJava: string;
     time: string;

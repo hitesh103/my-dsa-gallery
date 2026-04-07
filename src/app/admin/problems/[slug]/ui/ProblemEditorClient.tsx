@@ -18,6 +18,7 @@ function emptyContent(): ProblemContent {
     brute: {
       intuitionMd: "",
       approachMd: "",
+      dryRun: "",
       visualization: null,
       codeJava: "",
       time: "",
@@ -27,6 +28,7 @@ function emptyContent(): ProblemContent {
     optimal: {
       intuitionMd: "",
       approachMd: "",
+      dryRun: "",
       visualization: null,
       codeJava: "",
       time: "",
@@ -464,6 +466,17 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
               />
             </label>
             <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">Dry run (MD)</span>
+              <textarea
+                value={doc.content.brute.dryRun ?? ""}
+                onChange={(e) =>
+                  updateContent({ brute: { ...doc.content.brute, dryRun: e.target.value } })
+                }
+                rows={6}
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted-foreground">
                 Visualization (React Flow JSON)
               </span>
@@ -567,6 +580,17 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
                   updateContent({
                     optimal: { ...doc.content.optimal, approachMd: e.target.value },
                   })
+                }
+                rows={6}
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">Dry run (MD)</span>
+              <textarea
+                value={doc.content.optimal.dryRun ?? ""}
+                onChange={(e) =>
+                  updateContent({ optimal: { ...doc.content.optimal, dryRun: e.target.value } })
                 }
                 rows={6}
                 className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"

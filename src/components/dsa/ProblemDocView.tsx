@@ -41,6 +41,12 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       <Markdown>{c.brute.intuitionMd}</Markdown>
       <h3>Approach</h3>
       <Markdown>{c.brute.approachMd}</Markdown>
+      {c.brute.dryRun ? (
+        <>
+          <h3>Dry Run</h3>
+          <Markdown>{c.brute.dryRun}</Markdown>
+        </>
+      ) : null}
       {c.brute.visualization ? (
         <>
           <h3>Visualization</h3>
@@ -58,6 +64,12 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       <Markdown>{c.optimal.intuitionMd}</Markdown>
       <h3>Approach</h3>
       <Markdown>{c.optimal.approachMd}</Markdown>
+      {c.optimal.dryRun ? (
+        <>
+          <h3>Dry Run</h3>
+          <Markdown>{c.optimal.dryRun}</Markdown>
+        </>
+      ) : null}
       {c.optimal.visualization ? (
         <>
           <h3>Visualization</h3>

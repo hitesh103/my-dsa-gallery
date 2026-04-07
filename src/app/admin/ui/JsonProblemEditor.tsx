@@ -22,6 +22,7 @@ function defaultPayload(): ProblemDoc {
       brute: {
         intuitionMd: "Intuition for brute force.",
         approachMd: "Approach steps for brute force.",
+        dryRun: "Show one sample execution step by step.",
         visualization: {
           nodes: [
             { id: "A", position: { x: 0, y: 0 }, data: { label: "Start" } },
@@ -41,6 +42,7 @@ function defaultPayload(): ProblemDoc {
       optimal: {
         intuitionMd: "Intuition for optimal.",
         approachMd: "Approach steps for optimal.",
+        dryRun: "Show the optimized execution on the same sample input.",
         visualization: {
           nodes: [
             { id: "A", position: { x: 0, y: 0 }, data: { label: "Start" } },
