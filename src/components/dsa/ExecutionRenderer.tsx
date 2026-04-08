@@ -163,6 +163,22 @@ export function ExecutionRenderer({
                 </span>
               </div>
             )}
+            {step?.result && Object.keys(step.result).length > 0 && (
+              <div className="flex flex-col gap-1">
+                <span className="text-xs font-medium uppercase" style={{ color: textSecondary }}>
+                  Result:
+                </span>
+                {Object.entries(step.result).map(([key, value]) => (
+                  <span
+                    key={key}
+                    className="rounded bg-green-100 px-2 py-1 text-xs font-mono dark:bg-green-900"
+                    style={{ color: textPrimary }}
+                  >
+                    {key}: {String(value)}
+                  </span>
+                ))}
+              </div>
+            )}
             {step?.payload && Object.entries(step.payload).length > 0 && (
               <div className="flex flex-col gap-1">
                 <span className="text-xs font-medium uppercase" style={{ color: textSecondary }}>

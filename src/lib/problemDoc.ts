@@ -125,6 +125,7 @@ export type ExecutionStep = {
   action?: string;
   highlight?: string;
   payload?: Record<string, unknown>;
+  result?: Record<string, unknown>;
 };
 
 export type ExecutionVisualization = {
