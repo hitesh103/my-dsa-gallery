@@ -117,11 +117,31 @@ export type FlowVisualizationStep = {
   viewport?: { x: number; y: number; zoom: number };
 };
 
+export type ExecutionStep = {
+  step: number;
+  label?: string;
+  description?: string;
+  state?: Record<string, unknown>;
+  action?: string;
+  highlight?: string;
+  payload?: Record<string, unknown>;
+};
+
+export type ExecutionVisualization = {
+  steps: ExecutionStep[];
+  initialState?: Record<string, unknown>;
+};
+
+export type VisualizationType = "flow" | "execution";
+
 export type FlowVisualization = {
+  type?: VisualizationType;
   nodes?: FlowNode[];
   edges?: FlowEdge[];
   viewport?: { x: number; y: number; zoom: number };
   steps?: FlowVisualizationStep[];
+  flowSteps?: FlowVisualizationStep[];
+  executionSteps?: ExecutionStep[];
 };
 
 export type ProblemDoc = {

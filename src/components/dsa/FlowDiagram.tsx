@@ -189,10 +189,10 @@ export function FlowDiagram({
 
   const steps = useMemo(() => {
     if (!visualization) return null;
-    if (visualization.steps && Array.isArray(visualization.steps) && visualization.steps.length > 0) {
-      return visualization.steps.map(normalizeStep).filter(Boolean) as FlowVisualizationStep[];
+    if (visualization.flowSteps && Array.isArray(visualization.flowSteps) && visualization.flowSteps.length > 0) {
+      return visualization.flowSteps.map(normalizeStep).filter(Boolean) as FlowVisualizationStep[];
     }
-    if (Array.isArray(visualization.nodes) && Array.isArray(visualization.edges)) {
+    if (visualization.type === "flow" && Array.isArray(visualization.nodes) && Array.isArray(visualization.edges)) {
       return [{ nodes: visualization.nodes, edges: visualization.edges, viewport: visualization.viewport }];
     }
     return null;

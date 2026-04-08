@@ -1,12 +1,26 @@
 import { ComplexityBadge } from "@/components/dsa/ComplexityBadge";
+import { ExecutionRenderer } from "@/components/dsa/ExecutionRenderer";
 import { FlowDiagram } from "@/components/dsa/FlowDiagram";
 import { Markdown } from "@/components/dsa/Markdown";
 import { QuickRevision } from "@/components/dsa/QuickRevision";
-import type { ProblemDoc } from "@/lib/problemDoc";
+import type { FlowVisualization, ProblemDoc } from "@/lib/problemDoc";
 
 function javaFence(code: string) {
   const trimmed = (code ?? "").trimEnd();
   return `\`\`\`java\n${trimmed}\n\`\`\``;
+}
+
+function Visualization({ visualization }: { visualization: FlowVisualization | null | undefined }) {
+  if (!visualization) return null;
+
+  const type = visualization.type;
+
+  if (type === "execution") {
+    const execVis = visualization as FlowVisualization & { executionSteps: FlowVisualization["executionSteps"] };
+    return <ExecutionRenderer visualization={{ steps: execVis.executionSteps ?? [] }} />;
+  }
+
+  return <FlowDiagram visualization={visualization} />;
 }
 
 export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
@@ -50,7 +64,7 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       {c.brute.visualization ? (
         <>
           <h3>Visualization</h3>
-          <FlowDiagram visualization={c.brute.visualization} />
+          <Visualization visualization={c.brute.visualization} />
         </>
       ) : null}
       <h3>Code (Java)</h3>
@@ -73,7 +87,7 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
       {c.optimal.visualization ? (
         <>
           <h3>Visualization</h3>
-          <FlowDiagram visualization={c.optimal.visualization} />
+          <Visualization visualization={c.optimal.visualization} />
         </>
       ) : null}
       <h3>Code (Java)</h3>
