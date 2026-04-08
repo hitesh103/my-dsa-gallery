@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import ReactFlow, { Background, Controls, MiniMap, useEdgesState, useNodesState } from "reactflow";
+import ReactFlow, { Background, Controls, MiniMap, Position, useEdgesState, useNodesState } from "reactflow";
 
 import type { FlowEdge, FlowEdgeData, FlowNode, FlowNodeData, FlowVisualization, FlowVisualizationStep } from "@/lib/problemDoc";
 import { cn } from "@/lib/cn";
@@ -11,6 +11,12 @@ import { edgeTypes } from "./nodes/StyledEdges";
 
 type ColorMode = "light" | "dark";
 type AnchorSide = "top" | "right" | "bottom" | "left";
+const positionBySide: Record<AnchorSide, Position> = {
+  top: Position.Top,
+  right: Position.Right,
+  bottom: Position.Bottom,
+  left: Position.Left,
+};
 type LegendItem = {
   color: string;
   label: string;
@@ -212,8 +218,8 @@ export function FlowDiagram({
         className: node.className,
         draggable: node.draggable ?? false,
         selectable: node.selectable ?? true,
-        sourcePosition: isAnchorSide(node.sourcePosition) ? node.sourcePosition : undefined,
-        targetPosition: isAnchorSide(node.targetPosition) ? node.targetPosition : undefined,
+        sourcePosition: isAnchorSide(node.sourcePosition) ? positionBySide[node.sourcePosition] : undefined,
+        targetPosition: isAnchorSide(node.targetPosition) ? positionBySide[node.targetPosition] : undefined,
         width: node.width,
         height: node.height,
       };
@@ -252,8 +258,8 @@ export function FlowDiagram({
             edge.sourceHandle ??
             inferSourceHandle(nodeTypeById.get(edge.source) ?? "flowchart", semanticType, sourceSide),
           targetHandle: edge.targetHandle ?? targetHandleBySide[targetSide],
-          sourcePosition: sourceSide,
-          targetPosition: targetSide,
+          sourcePosition: positionBySide[sourceSide],
+          targetPosition: positionBySide[targetSide],
           type: edge.type || "bezier",
           label,
           animated: edge.animated,
