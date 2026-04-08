@@ -2,14 +2,34 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState } from "reactflow";
+import ReactFlow, { Background, Controls, MiniMap, useEdgesState, useNodesState } from "reactflow";
 
-import type { FlowVisualization, FlowNode, FlowEdge, FlowVisualizationStep, FlowNodeData, FlowEdgeData } from "@/lib/problemDoc";
+import type { FlowEdge, FlowEdgeData, FlowNode, FlowNodeData, FlowVisualization, FlowVisualizationStep } from "@/lib/problemDoc";
 import { cn } from "@/lib/cn";
 import { nodeTypes } from "./nodes/DataStructureNodes";
 import { edgeTypes } from "./nodes/StyledEdges";
 
 type ColorMode = "light" | "dark";
+type AnchorSide = "top" | "right" | "bottom" | "left";
+type LegendItem = {
+  color: string;
+  label: string;
+  dashed?: boolean;
+};
+
+const sourceHandleBySide: Record<AnchorSide, string> = {
+  top: "s-top",
+  right: "s-right",
+  bottom: "s-bottom",
+  left: "s-left",
+};
+
+const targetHandleBySide: Record<AnchorSide, string> = {
+  top: "t-top",
+  right: "t-right",
+  bottom: "t-bottom",
+  left: "t-left",
+};
 
 function getColorMode(): ColorMode {
   return document.documentElement.classList.contains("dark") ? "dark" : "light";
@@ -21,13 +41,82 @@ function normalizeStep(step: FlowVisualizationStep | null | undefined): FlowVisu
   return step;
 }
 
-type LegendItem = {
-  color: string;
-  label: string;
-  dashed?: boolean;
-};
+function isAnchorSide(value: string | undefined): value is AnchorSide {
+  return value === "top" || value === "right" || value === "bottom" || value === "left";
+}
 
-function Legend({ items, isDark }: { items: LegendItem[]; isDark: boolean }) {
+function normalizeNodeType(node: FlowNode): string {
+  if (typeof node.type === "string" && node.type in nodeTypes) return node.type;
+  if (typeof node.data?.type === "string" && node.data.type in nodeTypes) return node.data.type;
+  return "flowchart";
+}
+
+function inferAnchorSides(sourceNode: FlowNode, targetNode: FlowNode): [AnchorSide, AnchorSide] {
+  const dx = targetNode.position.x - sourceNode.position.x;
+  const dy = targetNode.position.y - sourceNode.position.y;
+
+  if (Math.abs(dx) >= Math.abs(dy)) {
+    return dx >= 0 ? ["right", "left"] : ["left", "right"];
+  }
+
+  return dy >= 0 ? ["bottom", "top"] : ["top", "bottom"];
+}
+
+function inferEdgeSemanticType(edge: FlowEdge): FlowEdgeData["type"] {
+  if (edge.data?.type) return edge.data.type;
+
+  const label = edge.label?.toLowerCase();
+  if (!label) return undefined;
+  if (label.includes("next")) return "next";
+  if (label.includes("random")) return "random";
+  if (label.includes("left")) return "left";
+  if (label.includes("right")) return "right";
+  return undefined;
+}
+
+function inferSourceHandle(nodeType: string, edgeType: FlowEdgeData["type"], side: AnchorSide) {
+  if (nodeType === "linkedList" && (edgeType === "next" || edgeType === "random")) return edgeType;
+  if (nodeType === "tree" && (edgeType === "left" || edgeType === "right")) return edgeType;
+  return sourceHandleBySide[side];
+}
+
+function extractLegendItems(steps: FlowVisualizationStep[], currentStep: number): LegendItem[] {
+  const step = steps[currentStep];
+  if (!step) return [];
+
+  const items: LegendItem[] = [];
+  const seenTypes = new Set<string>();
+
+  for (const edge of step.edges) {
+    const type = inferEdgeSemanticType(edge);
+    if (!type || seenTypes.has(type)) continue;
+
+    seenTypes.add(type);
+
+    switch (type) {
+      case "next":
+        items.push({ color: "rgb(37 99 235)", label: "Next pointer" });
+        break;
+      case "random":
+        items.push({ color: "rgb(147 51 234)", label: "Random pointer", dashed: true });
+        break;
+      case "left":
+        items.push({ color: "rgb(22 163 74)", label: "Left child" });
+        break;
+      case "right":
+        items.push({ color: "rgb(220 38 38)", label: "Right child" });
+        break;
+      case "edge":
+      case "undirected":
+        items.push({ color: "rgb(75 85 99)", label: "Edge" });
+        break;
+    }
+  }
+
+  return items;
+}
+
+function Legend({ items }: { items: LegendItem[] }) {
   if (items.length === 0) return null;
 
   return (
@@ -52,42 +141,6 @@ function Legend({ items, isDark }: { items: LegendItem[]; isDark: boolean }) {
   );
 }
 
-function extractLegendItems(steps: FlowVisualizationStep[], currentStep: number): LegendItem[] {
-  const step = steps[currentStep];
-  if (!step) return [];
-
-  const items: LegendItem[] = [];
-  const edgeTypes = new Set<string>();
-
-  for (const edge of step.edges) {
-    const type = edge.data?.type;
-    if (type && !edgeTypes.has(type)) {
-      edgeTypes.add(type);
-      
-      switch (type) {
-        case "next":
-          items.push({ color: "rgb(37 99 235)", label: "Next pointer" });
-          break;
-        case "random":
-          items.push({ color: "rgb(147 51 234)", label: "Random pointer", dashed: true });
-          break;
-        case "left":
-          items.push({ color: "rgb(22 163 74)", label: "Left child" });
-          break;
-        case "right":
-          items.push({ color: "rgb(220 38 38)", label: "Right child" });
-          break;
-        case "edge":
-        case "undirected":
-          items.push({ color: "rgb(75 85 99)", label: "Edge" });
-          break;
-      }
-    }
-  }
-
-  return items;
-}
-
 export function FlowDiagram({
   visualization,
   className,
@@ -95,18 +148,38 @@ export function FlowDiagram({
   visualization?: FlowVisualization | null;
   className?: string;
 }) {
-  const [colorMode, setColorMode] = useState<ColorMode>("light");
+  const [colorMode, setColorMode] = useState<ColorMode>(() => {
+    if (typeof document === "undefined") return "light";
+    return getColorMode();
+  });
   const [currentStep, setCurrentStep] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
-    setColorMode(getColorMode());
     const observer = new MutationObserver(() => setColorMode(getColorMode()));
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsFullscreen(false);
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isFullscreen]);
 
   const steps = useMemo(() => {
     if (!visualization) return null;
@@ -119,65 +192,86 @@ export function FlowDiagram({
     return null;
   }, [visualization]);
 
+  const activeStepIndex = steps ? Math.min(currentStep, steps.length - 1) : 0;
+
   useEffect(() => {
     if (!steps || steps.length === 0) return;
-    const step = steps[currentStep];
+    const step = steps[activeStepIndex];
     if (!step) return;
 
-    const mappedNodes = step.nodes.map((n: FlowNode) => {
-      const nodeType = n.type || "default";
-      const defaultData: FlowNodeData = { label: n.id };
-      const mergedData = { ...defaultData, ...n.data };
+    const normalizedNodes = step.nodes.map((node: FlowNode) => {
+      const nodeType = normalizeNodeType(node);
+      const defaultData: FlowNodeData = { label: node.id };
 
       return {
-        id: n.id,
+        id: node.id,
         type: nodeType,
-        data: mergedData,
-        position: n.position,
-        style: n.style,
-        className: n.className,
-        draggable: n.draggable ?? false,
-        selectable: n.selectable ?? true,
+        data: { ...defaultData, ...node.data },
+        position: node.position,
+        style: node.style,
+        className: node.className,
+        draggable: node.draggable ?? false,
+        selectable: node.selectable ?? true,
+        sourcePosition: isAnchorSide(node.sourcePosition) ? node.sourcePosition : undefined,
+        targetPosition: isAnchorSide(node.targetPosition) ? node.targetPosition : undefined,
+        width: node.width,
+        height: node.height,
       };
     });
 
-    const mappedEdges = step.edges.map((e: FlowEdge) => {
-      const edgeData: FlowEdgeData = {};
-      if (e.data) {
-        edgeData.type = e.data.type;
-        edgeData.weight = e.data.weight;
-        edgeData.highlight = e.data.highlight;
-      } else {
-        if (e.label?.toLowerCase().includes("next")) {
-          edgeData.type = "next";
-        } else if (e.label?.toLowerCase().includes("random")) {
-          edgeData.type = "random";
-        } else if (e.label?.toLowerCase().includes("left")) {
-          edgeData.type = "left";
-        } else if (e.label?.toLowerCase().includes("right")) {
-          edgeData.type = "right";
-        }
-      }
+    const rawNodeById = new Map(step.nodes.map((node) => [node.id, node]));
+    const nodeTypeById = new Map(normalizedNodes.map((node) => [node.id, node.type]));
 
-      return {
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        sourceHandle: e.sourceHandle,
-        targetHandle: e.targetHandle,
-        sourcePosition: e.sourcePosition,
-        targetPosition: e.targetPosition,
-        type: e.type || "bezier",
-        label: e.label,
-        animated: e.animated,
-        data: edgeData,
-        style: e.style,
-      };
+    const normalizedEdges = step.edges.flatMap((edge: FlowEdge) => {
+      const sourceNode = rawNodeById.get(edge.source);
+      const targetNode = rawNodeById.get(edge.target);
+
+      if (!sourceNode || !targetNode) return [];
+
+      const semanticType = inferEdgeSemanticType(edge);
+      const label = edge.data?.label ?? edge.label;
+      const [inferredSourceSide, inferredTargetSide] = inferAnchorSides(sourceNode, targetNode);
+
+      const sourceSide = isAnchorSide(edge.sourcePosition)
+        ? edge.sourcePosition
+        : isAnchorSide(sourceNode.sourcePosition)
+          ? sourceNode.sourcePosition
+          : inferredSourceSide;
+      const targetSide = isAnchorSide(edge.targetPosition)
+        ? edge.targetPosition
+        : isAnchorSide(targetNode.targetPosition)
+          ? targetNode.targetPosition
+          : inferredTargetSide;
+
+      return [
+        {
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          sourceHandle:
+            edge.sourceHandle ??
+            inferSourceHandle(nodeTypeById.get(edge.source) ?? "flowchart", semanticType, sourceSide),
+          targetHandle: edge.targetHandle ?? targetHandleBySide[targetSide],
+          sourcePosition: sourceSide,
+          targetPosition: targetSide,
+          type: edge.type || "bezier",
+          label,
+          animated: edge.animated,
+          data: {
+            ...edge.data,
+            type: semanticType,
+            weight: edge.data?.weight,
+            highlight: edge.data?.highlight,
+            label,
+          },
+          style: edge.style,
+        },
+      ];
     });
 
-    setNodes(mappedNodes);
-    setEdges(mappedEdges);
-  }, [steps, currentStep, setNodes, setEdges]);
+    setNodes(normalizedNodes);
+    setEdges(normalizedEdges);
+  }, [activeStepIndex, setEdges, setNodes, steps]);
 
   const goToPrev = useCallback(() => {
     if (!steps) return;
@@ -194,59 +288,98 @@ export function FlowDiagram({
   const isDark = colorMode === "dark";
   const bg = isDark ? "#09090b" : "#fafafa";
   const border = isDark ? "rgba(255,255,255,0.10)" : "rgba(24,24,27,0.10)";
-  const step = steps[currentStep];
+  const step = steps[activeStepIndex];
   const hasMultipleSteps = steps.length > 1;
-  const legendItems = extractLegendItems(steps, currentStep);
+  const legendItems = extractLegendItems(steps, activeStepIndex);
 
-  return (
+  const actionButtonClassName =
+    "inline-flex min-h-[40px] items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium transition-colors hover:bg-accent";
+
+  const renderCanvas = (heightClassName: string) => (
+    <div className={cn("w-full overflow-hidden rounded-lg", heightClassName)} style={{ background: bg }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        fitView
+        defaultViewport={step.viewport as { x: number; y: number; zoom: number } | undefined}
+        nodesDraggable={false}
+        nodesConnectable={false}
+        elementsSelectable
+        panOnDrag
+        zoomOnScroll
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background gap={18} size={1} />
+        <MiniMap pannable zoomable />
+        <Controls showInteractive={false} />
+      </ReactFlow>
+    </div>
+  );
+
+  const renderPanel = (heightClassName: string, fullscreen: boolean) => (
     <div
-      className={cn("not-prose overflow-hidden rounded-xl border bg-card", className)}
+      className={cn("not-prose overflow-hidden rounded-xl border bg-card", className, fullscreen && "shadow-2xl")}
       style={{ borderColor: border }}
     >
       {hasMultipleSteps && (
-        <div className="flex items-center justify-between gap-2 sm:gap-3 border-b px-3 py-2 sm:px-4 sm:py-3" style={{ borderColor: border }}>
+        <div
+          className="flex items-center justify-between gap-2 border-b px-3 py-2 sm:gap-3 sm:px-4 sm:py-3"
+          style={{ borderColor: border }}
+        >
           <button
+            type="button"
             onClick={goToPrev}
-            disabled={currentStep === 0}
+            disabled={activeStepIndex === 0}
             className={cn(
-              "rounded-lg px-2.5 py-2 text-sm font-medium transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
-              currentStep === 0
-                ? "cursor-not-allowed opacity-40"
-                : "hover:bg-accent"
+              "flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+              activeStepIndex === 0 ? "cursor-not-allowed opacity-40" : "hover:bg-accent"
             )}
             style={{ color: isDark ? "#e4e4e7" : "#18181b" }}
           >
             ← Prev
           </button>
           <div className="flex flex-col items-center gap-1">
-            <span className="text-sm font-semibold truncate max-w-[200px] sm:max-w-none" style={{ color: isDark ? "#e4e4e7" : "#18181b" }}>
-              {step.label || `Step ${currentStep + 1}`}
+            <span
+              className="max-w-[200px] truncate text-sm font-semibold sm:max-w-none"
+              style={{ color: isDark ? "#e4e4e7" : "#18181b" }}
+            >
+              {step.label || `Step ${activeStepIndex + 1}`}
             </span>
-            {step.description && (
-              <span className="text-xs truncate max-w-[200px] sm:max-w-none" style={{ color: isDark ? "#a1a1aa" : "#71717a" }}>
+            {step.description ? (
+              <span
+                className="max-w-[200px] truncate text-xs sm:max-w-none"
+                style={{ color: isDark ? "#a1a1aa" : "#71717a" }}
+              >
                 {step.description}
               </span>
-            )}
+            ) : null}
             <div className="flex gap-1.5">
               {steps.map((_, idx) => (
                 <button
                   key={idx}
+                  type="button"
                   onClick={() => setCurrentStep(idx)}
                   className={cn(
-                    "h-2 w-2 rounded-full transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center",
-                    idx === currentStep ? "" : "opacity-40 hover:opacity-70"
+                    "flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full transition-colors",
+                    idx === activeStepIndex ? "" : "opacity-40 hover:opacity-70"
                   )}
                   aria-label={`Go to step ${idx + 1}`}
                 >
                   <span
-                    className={cn(
-                      "block h-2 w-2 rounded-full",
-                      idx === currentStep ? "" : "opacity-40"
-                    )}
+                    className={cn("block h-2 w-2 rounded-full", idx === activeStepIndex ? "" : "opacity-40")}
                     style={{
-                      backgroundColor: idx === currentStep
-                        ? (isDark ? "#3b82f6" : "#2563eb")
-                        : (isDark ? "#71717a" : "#a1a1aa")
+                      backgroundColor:
+                        idx === activeStepIndex
+                          ? isDark
+                            ? "#3b82f6"
+                            : "#2563eb"
+                          : isDark
+                            ? "#71717a"
+                            : "#a1a1aa",
                     }}
                   />
                 </button>
@@ -254,13 +387,12 @@ export function FlowDiagram({
             </div>
           </div>
           <button
+            type="button"
             onClick={goToNext}
-            disabled={currentStep === steps.length - 1}
+            disabled={activeStepIndex === steps.length - 1}
             className={cn(
-              "rounded-lg px-2.5 py-2 text-sm font-medium transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
-              currentStep === steps.length - 1
-                ? "cursor-not-allowed opacity-40"
-                : "hover:bg-accent"
+              "flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
+              activeStepIndex === steps.length - 1 ? "cursor-not-allowed opacity-40" : "hover:bg-accent"
             )}
             style={{ color: isDark ? "#e4e4e7" : "#18181b" }}
           >
@@ -268,31 +400,39 @@ export function FlowDiagram({
           </button>
         </div>
       )}
-      <div className="p-3 sm:p-4" style={{ borderColor: border }}>
-        {legendItems.length > 0 && <Legend items={legendItems} isDark={isDark} />}
-        <div className="h-[280px] sm:h-[360px] w-full overflow-hidden rounded-lg" style={{ background: bg }}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            fitView
-            defaultViewport={step.viewport as { x: number; y: number; zoom: number } | undefined}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            elementsSelectable={true}
-            panOnDrag
-            zoomOnScroll
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            proOptions={{ hideAttribution: true }}
+      <div className="p-3 sm:p-4">
+        <div className="mb-3 flex justify-end">
+          <button
+            type="button"
+            onClick={() => setIsFullscreen((prev) => !prev)}
+            className={actionButtonClassName}
+            style={{ borderColor: border, color: isDark ? "#e4e4e7" : "#18181b" }}
           >
-            <Background gap={18} size={1} />
-            <MiniMap pannable zoomable />
-            <Controls showInteractive={false} />
-          </ReactFlow>
+            {fullscreen ? "Exit full screen" : "Full screen"}
+          </button>
         </div>
+        <Legend items={legendItems} />
+        {renderCanvas(heightClassName)}
       </div>
     </div>
+  );
+
+  return (
+    <>
+      {renderPanel("h-[280px] sm:h-[360px]", false)}
+      {isFullscreen ? (
+        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+          <button
+            type="button"
+            aria-label="Close full screen visualization"
+            onClick={() => setIsFullscreen(false)}
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          />
+          <div className="relative z-10 w-full max-w-7xl">
+            {renderPanel("h-[calc(100vh-12rem)]", true)}
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

@@ -32,7 +32,7 @@ export type ProblemContent = {
 
 export type FlowNode = {
   id: string;
-  type?: "array" | "linkedList" | "tree" | "graph" | "matrix" | string;
+  type?: "array" | "linkedList" | "tree" | "graph" | "matrix" | "flowchart" | string;
   data?: FlowNodeData;
   position: { x: number; y: number };
   style?: Record<string, unknown>;
@@ -106,6 +106,7 @@ export type FlowEdgeData = {
   type?: "next" | "random" | "left" | "right" | "parent" | "child" | "edge" | "undirected";
   weight?: string | number;
   highlight?: "default" | "active" | "path" | "visited" | "new";
+  label?: string;
 };
 
 export type FlowVisualizationStep = {

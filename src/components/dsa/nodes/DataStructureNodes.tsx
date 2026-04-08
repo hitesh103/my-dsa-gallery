@@ -1,6 +1,24 @@
 import { Handle, Position, type NodeProps } from "reactflow";
 import { cn } from "@/lib/cn";
 
+const hiddenHandleClassName =
+  "!h-2 !w-2 !rounded-full !border-0 !bg-transparent !opacity-0 pointer-events-none";
+
+function SideHandles() {
+  return (
+    <>
+      <Handle type="target" position={Position.Top} id="t-top" className={hiddenHandleClassName} />
+      <Handle type="source" position={Position.Top} id="s-top" className={hiddenHandleClassName} />
+      <Handle type="target" position={Position.Right} id="t-right" className={hiddenHandleClassName} />
+      <Handle type="source" position={Position.Right} id="s-right" className={hiddenHandleClassName} />
+      <Handle type="target" position={Position.Bottom} id="t-bottom" className={hiddenHandleClassName} />
+      <Handle type="source" position={Position.Bottom} id="s-bottom" className={hiddenHandleClassName} />
+      <Handle type="target" position={Position.Left} id="t-left" className={hiddenHandleClassName} />
+      <Handle type="source" position={Position.Left} id="s-left" className={hiddenHandleClassName} />
+    </>
+  );
+}
+
 export type ArrayNodeData = {
   label?: string;
   index?: number;
@@ -34,6 +52,7 @@ export function ArrayNode({ data }: NodeProps<ArrayNodeData>) {
           style
         )}
       >
+        <SideHandles />
         <span className="font-mono">{value ?? label}</span>
         {extra && (
           <span className="ml-1.5 rounded bg-muted px-1.5 py-0.5 text-xs">{extra}</span>
@@ -59,8 +78,8 @@ const llHighlightStyles = {
   traversed: "bg-muted border-muted-foreground",
 };
 
-export function LinkedListNode({ data, id }: NodeProps<LinkedListNodeData>) {
-  const { value, highlight = "default", nextLabel, randomLabel } = data;
+export function LinkedListNode({ data }: NodeProps<LinkedListNodeData>) {
+  const { value, highlight = "default" } = data;
   const style = llHighlightStyles[highlight];
 
   return (
@@ -71,6 +90,7 @@ export function LinkedListNode({ data, id }: NodeProps<LinkedListNodeData>) {
           style
         )}
       >
+        <SideHandles />
         <Handle
           type="target"
           position={Position.Left}
@@ -123,6 +143,7 @@ export function TreeNode({ data }: NodeProps<TreeNodeData>) {
         style
       )}
     >
+      <SideHandles />
       <Handle
         type="target"
         position={Position.Top}
@@ -175,6 +196,7 @@ export function GraphNode({ data }: NodeProps<GraphNodeData>) {
           style
         )}
       >
+        <SideHandles />
         <Handle
           type="target"
           position={Position.Top}
@@ -230,7 +252,42 @@ export function MatrixCell({ data }: NodeProps<MatrixCellData>) {
           style
         )}
       >
+        <SideHandles />
         {value}
+      </div>
+    </div>
+  );
+}
+
+export type FlowchartNodeData = {
+  label?: string;
+  value?: string | number;
+  highlight?: "default" | "active" | "success" | "danger";
+  extra?: string;
+};
+
+const flowchartHighlightStyles = {
+  default: "bg-card border-border",
+  active: "bg-blue-100 dark:bg-blue-900 border-blue-500",
+  success: "bg-green-100 dark:bg-green-900 border-green-500",
+  danger: "bg-red-100 dark:bg-red-900 border-red-500",
+};
+
+export function FlowchartNode({ data }: NodeProps<FlowchartNodeData>) {
+  const { label, value, highlight = "default", extra } = data;
+  const style = flowchartHighlightStyles[highlight];
+
+  return (
+    <div
+      className={cn(
+        "relative flex min-w-[120px] max-w-[220px] items-center justify-center rounded-xl border-2 px-4 py-3 text-center text-sm font-medium transition-all",
+        style
+      )}
+    >
+      <SideHandles />
+      <div className="flex flex-col items-center gap-1">
+        <span>{value ?? label}</span>
+        {extra ? <span className="text-xs text-muted-foreground">{extra}</span> : null}
       </div>
     </div>
   );
@@ -242,5 +299,6 @@ export const nodeTypes = {
   tree: TreeNode,
   graph: GraphNode,
   matrix: MatrixCell,
-  default: ArrayNode,
+  flowchart: FlowchartNode,
+  default: FlowchartNode,
 };
