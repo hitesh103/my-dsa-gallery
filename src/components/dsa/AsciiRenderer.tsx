@@ -65,16 +65,18 @@ export function AsciiStepper({ steps, className }: AsciiStepperProps) {
           <button
             onClick={goPrev}
             disabled={currentStep === 0}
-            className="rounded px-2 py-1 text-xs hover:bg-muted disabled:opacity-50"
+            className="flex items-center gap-1 rounded px-3 py-1 text-sm font-medium hover:bg-muted disabled:opacity-50"
+            aria-label="Previous step"
           >
-            Previous
+            ← Prev
           </button>
           <button
             onClick={goNext}
             disabled={currentStep === steps.length - 1}
-            className="rounded px-2 py-1 text-xs hover:bg-muted disabled:opacity-50"
+            className="flex items-center gap-1 rounded px-3 py-1 text-sm font-medium hover:bg-muted disabled:opacity-50"
+            aria-label="Next step"
           >
-            Next
+            Next →
           </button>
         </div>
       </div>
