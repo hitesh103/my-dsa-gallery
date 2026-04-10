@@ -11,29 +11,42 @@ type ApiGet = { problem: ProblemDoc } | { error: string };
 function emptyContent(): ProblemContent {
   return {
     statementMd: "",
+    statementVisualization: null,
     inputMd: "",
+    inputVisualization: null,
     outputMd: "",
+    outputVisualization: null,
     exampleMd: "",
+    exampleVisualization: null,
     exampleExplanationMd: "",
+    exampleExplanationVisualization: null,
     brute: {
       intuitionMd: "",
+      intuitionVisualization: null,
       approachMd: "",
+      approachVisualization: null,
       dryRun: "",
+      dryRunVisualization: null,
       visualization: null,
       codeJava: "",
       time: "",
       space: "",
       complexityExplanationMd: "",
+      complexityVisualization: null,
     },
     optimal: {
       intuitionMd: "",
+      intuitionVisualization: null,
       approachMd: "",
+      approachVisualization: null,
       dryRun: "",
+      dryRunVisualization: null,
       visualization: null,
       codeJava: "",
       time: "",
       space: "",
       complexityExplanationMd: "",
+      complexityVisualization: null,
     },
     quickRevision: { brute: [], optimal: [] },
   };
@@ -387,53 +400,138 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
           <CardTitle>Problem Basics</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-4 lg:grid-cols-2">
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Problem statement (MD)</span>
-            <textarea
-              value={doc.content.statementMd}
-              onChange={(e) => updateContent({ statementMd: e.target.value })}
-              rows={8}
-              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-            />
-          </label>
-          <div className="grid gap-4">
+          <div className="space-y-2">
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Input (MD)</span>
+              <span className="text-xs font-medium text-muted-foreground">Problem statement (MD)</span>
               <textarea
-                value={doc.content.inputMd}
-                onChange={(e) => updateContent({ inputMd: e.target.value })}
-                rows={4}
+                value={doc.content.statementMd}
+                onChange={(e) => updateContent({ statementMd: e.target.value })}
+                rows={6}
                 className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
               />
             </label>
             <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Output (MD)</span>
+              <span className="text-xs font-medium text-muted-foreground">Statement Visualization (JSON)</span>
               <textarea
-                value={doc.content.outputMd}
-                onChange={(e) => updateContent({ outputMd: e.target.value })}
+                value={doc.content.statementVisualization ? JSON.stringify(doc.content.statementVisualization) : ""}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  if (!val) {
+                    updateContent({ statementVisualization: null });
+                    return;
+                  }
+                  try {
+                    updateContent({ statementVisualization: JSON.parse(val) });
+                  } catch {}
+                }}
                 rows={4}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                placeholder='{"engine":"mermaid","code":"..."}'
+                className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
               />
             </label>
           </div>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Example (MD)</span>
-            <textarea
-              value={doc.content.exampleMd}
-              onChange={(e) => updateContent({ exampleMd: e.target.value })}
-              rows={8}
-              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-            />
-          </label>
-          <label className="flex flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Example explanation (MD)</span>
-            <textarea
-              value={doc.content.exampleExplanationMd}
-              onChange={(e) => updateContent({ exampleExplanationMd: e.target.value })}
-              rows={8}
-              className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-            />
-          </label>
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Input (MD)</span>
+                <textarea
+                  value={doc.content.inputMd}
+                  onChange={(e) => updateContent({ inputMd: e.target.value })}
+                  rows={3}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Input Visualization</span>
+                <textarea
+                  value={doc.content.inputVisualization ? JSON.stringify(doc.content.inputVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ inputVisualization: null }); return; }
+                    try { updateContent({ inputVisualization: JSON.parse(val) }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Output (MD)</span>
+                <textarea
+                  value={doc.content.outputMd}
+                  onChange={(e) => updateContent({ outputMd: e.target.value })}
+                  rows={3}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Output Visualization</span>
+                <textarea
+                  value={doc.content.outputVisualization ? JSON.stringify(doc.content.outputVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ outputVisualization: null }); return; }
+                    try { updateContent({ outputVisualization: JSON.parse(val) }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">Example (MD)</span>
+              <textarea
+                value={doc.content.exampleMd}
+                onChange={(e) => updateContent({ exampleMd: e.target.value })}
+                rows={6}
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">Example Visualization</span>
+              <textarea
+                value={doc.content.exampleVisualization ? JSON.stringify(doc.content.exampleVisualization) : ""}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  if (!val) { updateContent({ exampleVisualization: null }); return; }
+                  try { updateContent({ exampleVisualization: JSON.parse(val) }); } catch {}
+                }}
+                rows={4}
+                placeholder='{"engine":"mermaid","code":"..."}'
+                className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </label>
+          </div>
+          <div className="space-y-2">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">Example explanation (MD)</span>
+              <textarea
+                value={doc.content.exampleExplanationMd}
+                onChange={(e) => updateContent({ exampleExplanationMd: e.target.value })}
+                rows={6}
+                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">Explanation Visualization</span>
+              <textarea
+                value={doc.content.exampleExplanationVisualization ? JSON.stringify(doc.content.exampleExplanationVisualization) : ""}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  if (!val) { updateContent({ exampleExplanationVisualization: null }); return; }
+                  try { updateContent({ exampleExplanationVisualization: JSON.parse(val) }); } catch {}
+                }}
+                rows={4}
+                placeholder='{"engine":"mermaid","code":"..."}'
+                className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+              />
+            </label>
+          </div>
         </CardContent>
       </Card>
 
@@ -443,137 +541,118 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
             <CardTitle>Brute Force</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Intuition (MD)</span>
-              <textarea
-                value={doc.content.brute.intuitionMd}
-                onChange={(e) =>
-                  updateContent({ brute: { ...doc.content.brute, intuitionMd: e.target.value } })
-                }
-                rows={5}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Approach (MD)</span>
-              <textarea
-                value={doc.content.brute.approachMd}
-                onChange={(e) =>
-                  updateContent({ brute: { ...doc.content.brute, approachMd: e.target.value } })
-                }
-                rows={6}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Dry run (MD)</span>
-              <textarea
-                value={doc.content.brute.dryRun ?? ""}
-                onChange={(e) =>
-                  updateContent({ brute: { ...doc.content.brute, dryRun: e.target.value } })
-                }
-                rows={6}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">
-                Visualization - Engine
-              </span>
-              <select
-                value={(doc.content.brute.visualization as { engine?: string })?.engine || "reactflow"}
-                onChange={(e) => {
-                  const engine = e.target.value as "reactflow" | "mermaid" | "ascii";
-                  if (engine === "reactflow") {
-                    updateContent({ brute: { ...doc.content.brute, visualization: { engine: "reactflow", nodes: [], edges: [] } } });
-                  } else if (engine === "mermaid") {
-                    updateContent({ brute: { ...doc.content.brute, visualization: { engine: "mermaid", code: "", steps: [] } } });
-                  } else {
-                    updateContent({ brute: { ...doc.content.brute, visualization: { engine: "ascii", lines: [], steps: [] } } });
-                  }
-                }}
-                className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              >
-                <option value="reactflow">React Flow</option>
-                <option value="mermaid">Mermaid</option>
-                <option value="ascii">ASCII</option>
-              </select>
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">
-                Visualization (JSON/Mermaid/ASCII based on engine)
-              </span>
-              <textarea
-                value={bruteVizText}
-                onChange={(e) => setBruteVizText(e.target.value)}
-                onBlur={() => {
-                  const raw = bruteVizText.trim();
-                  if (!raw) {
-                    updateContent({ brute: { ...doc.content.brute, visualization: null } });
-                    return;
-                  }
-                  try {
-                    const parsed = JSON.parse(raw) as Visualization;
-                    updateContent({ brute: { ...doc.content.brute, visualization: parsed } });
-                    setStatus("Visualization updated.");
-                  } catch {
-                    setStatus("Brute visualization JSON is invalid (not saved).");
-                  }
-                }}
-                rows={10}
-                spellCheck={false}
-                className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
-                placeholder={'React Flow: {"engine":"reactflow","nodes":[],"edges":[]}\nMermaid: {"engine":"mermaid","code":"graph TD;A-->B","steps":[]}\nASCII: {"engine":"ascii","lines":["  A  "," /|\\ "], "steps":[]}'}
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Java code</span>
-              <textarea
-                value={doc.content.brute.codeJava}
-                onChange={(e) =>
-                  updateContent({ brute: { ...doc.content.brute, codeJava: e.target.value } })
-                }
-                rows={14}
-                className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-2">
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-muted-foreground">Time</span>
-                <input
-                  value={doc.content.brute.time}
+                <span className="text-xs font-medium text-muted-foreground">Intuition (MD)</span>
+                <textarea
+                  value={doc.content.brute.intuitionMd}
                   onChange={(e) =>
-                    updateContent({ brute: { ...doc.content.brute, time: e.target.value } })
+                    updateContent({ brute: { ...doc.content.brute, intuitionMd: e.target.value } })
                   }
-                  className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                  rows={4}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
                 />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-xs font-medium text-muted-foreground">Space</span>
-                <input
-                  value={doc.content.brute.space}
-                  onChange={(e) =>
-                    updateContent({ brute: { ...doc.content.brute, space: e.target.value } })
-                  }
-                  className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                <span className="text-xs font-medium text-muted-foreground">Intuition Visualization</span>
+                <textarea
+                  value={doc.content.brute.intuitionVisualization ? JSON.stringify(doc.content.brute.intuitionVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ brute: { ...doc.content.brute, intuitionVisualization: null } }); return; }
+                    try { updateContent({ brute: { ...doc.content.brute, intuitionVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
                 />
               </label>
             </div>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">
-                Complexity explanation (MD)
-              </span>
-              <textarea
-                value={doc.content.brute.complexityExplanationMd}
-                onChange={(e) =>
-                  updateContent({
-                    brute: { ...doc.content.brute, complexityExplanationMd: e.target.value },
-                  })
-                }
-                rows={6}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Approach (MD)</span>
+                <textarea
+                  value={doc.content.brute.approachMd}
+                  onChange={(e) =>
+                    updateContent({ brute: { ...doc.content.brute, approachMd: e.target.value } })
+                  }
+                  rows={5}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Approach Visualization</span>
+                <textarea
+                  value={doc.content.brute.approachVisualization ? JSON.stringify(doc.content.brute.approachVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ brute: { ...doc.content.brute, approachVisualization: null } }); return; }
+                    try { updateContent({ brute: { ...doc.content.brute, approachVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","steps":[...]}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Dry run (MD)</span>
+                <textarea
+                  value={doc.content.brute.dryRun ?? ""}
+                  onChange={(e) =>
+                    updateContent({ brute: { ...doc.content.brute, dryRun: e.target.value } })
+                  }
+                  rows={5}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Dry Run Visualization</span>
+                <textarea
+                  value={doc.content.brute.dryRunVisualization ? JSON.stringify(doc.content.brute.dryRunVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ brute: { ...doc.content.brute, dryRunVisualization: null } }); return; }
+                    try { updateContent({ brute: { ...doc.content.brute, dryRunVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Complexity explanation (MD)
+                </span>
+                <textarea
+                  value={doc.content.brute.complexityExplanationMd}
+                  onChange={(e) =>
+                    updateContent({
+                      brute: { ...doc.content.brute, complexityExplanationMd: e.target.value },
+                    })
+                  }
+                  rows={5}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Complexity Visualization</span>
+                <textarea
+                  value={doc.content.brute.complexityVisualization ? JSON.stringify(doc.content.brute.complexityVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ brute: { ...doc.content.brute, complexityVisualization: null } }); return; }
+                    try { updateContent({ brute: { ...doc.content.brute, complexityVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
           </CardContent>
         </Card>
 
@@ -582,43 +661,91 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
             <CardTitle>Optimal</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Intuition (MD)</span>
-              <textarea
-                value={doc.content.optimal.intuitionMd}
-                onChange={(e) =>
-                  updateContent({
-                    optimal: { ...doc.content.optimal, intuitionMd: e.target.value },
-                  })
-                }
-                rows={5}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Approach (MD)</span>
-              <textarea
-                value={doc.content.optimal.approachMd}
-                onChange={(e) =>
-                  updateContent({
-                    optimal: { ...doc.content.optimal, approachMd: e.target.value },
-                  })
-                }
-                rows={6}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">Dry run (MD)</span>
-              <textarea
-                value={doc.content.optimal.dryRun ?? ""}
-                onChange={(e) =>
-                  updateContent({ optimal: { ...doc.content.optimal, dryRun: e.target.value } })
-                }
-                rows={6}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Intuition (MD)</span>
+                <textarea
+                  value={doc.content.optimal.intuitionMd}
+                  onChange={(e) =>
+                    updateContent({
+                      optimal: { ...doc.content.optimal, intuitionMd: e.target.value },
+                    })
+                  }
+                  rows={4}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Intuition Visualization</span>
+                <textarea
+                  value={doc.content.optimal.intuitionVisualization ? JSON.stringify(doc.content.optimal.intuitionVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ optimal: { ...doc.content.optimal, intuitionVisualization: null } }); return; }
+                    try { updateContent({ optimal: { ...doc.content.optimal, intuitionVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Approach (MD)</span>
+                <textarea
+                  value={doc.content.optimal.approachMd}
+                  onChange={(e) =>
+                    updateContent({
+                      optimal: { ...doc.content.optimal, approachMd: e.target.value },
+                    })
+                  }
+                  rows={5}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Approach Visualization</span>
+                <textarea
+                  value={doc.content.optimal.approachVisualization ? JSON.stringify(doc.content.optimal.approachVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ optimal: { ...doc.content.optimal, approachVisualization: null } }); return; }
+                    try { updateContent({ optimal: { ...doc.content.optimal, approachVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","steps":[...]}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Dry run (MD)</span>
+                <textarea
+                  value={doc.content.optimal.dryRun ?? ""}
+                  onChange={(e) =>
+                    updateContent({ optimal: { ...doc.content.optimal, dryRun: e.target.value } })
+                  }
+                  rows={5}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Dry Run Visualization</span>
+                <textarea
+                  value={doc.content.optimal.dryRunVisualization ? JSON.stringify(doc.content.optimal.dryRunVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ optimal: { ...doc.content.optimal, dryRunVisualization: null } }); return; }
+                    try { updateContent({ optimal: { ...doc.content.optimal, dryRunVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted-foreground">
                 Visualization - Engine
@@ -702,21 +829,37 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
                 />
               </label>
             </div>
-            <label className="flex flex-col gap-1">
-              <span className="text-xs font-medium text-muted-foreground">
-                Complexity explanation (MD)
-              </span>
-              <textarea
-                value={doc.content.optimal.complexityExplanationMd}
-                onChange={(e) =>
-                  updateContent({
-                    optimal: { ...doc.content.optimal, complexityExplanationMd: e.target.value },
-                  })
-                }
-                rows={6}
-                className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
-              />
-            </label>
+            <div className="space-y-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">
+                  Complexity explanation (MD)
+                </span>
+                <textarea
+                  value={doc.content.optimal.complexityExplanationMd}
+                  onChange={(e) =>
+                    updateContent({
+                      optimal: { ...doc.content.optimal, complexityExplanationMd: e.target.value },
+                    })
+                  }
+                  rows={5}
+                  className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Complexity Visualization</span>
+                <textarea
+                  value={doc.content.optimal.complexityVisualization ? JSON.stringify(doc.content.optimal.complexityVisualization) : ""}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    if (!val) { updateContent({ optimal: { ...doc.content.optimal, complexityVisualization: null } }); return; }
+                    try { updateContent({ optimal: { ...doc.content.optimal, complexityVisualization: JSON.parse(val) } }); } catch {}
+                  }}
+                  rows={3}
+                  placeholder='{"engine":"mermaid","code":"..."}'
+                  className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
+                />
+              </label>
+            </div>
           </CardContent>
         </Card>
       </div>

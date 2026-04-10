@@ -45,6 +45,26 @@ function Visualization({ visualization }: { visualization: Visualization | null 
   return <FlowDiagram visualization={visualization} />;
 }
 
+function SectionWithViz({
+  title,
+  md,
+  visualization,
+  className,
+}: {
+  title: string;
+  md: string;
+  visualization?: Visualization | null;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      <h3>{title}</h3>
+      <Markdown>{md}</Markdown>
+      {visualization ? <Visualization visualization={visualization} /> : null}
+    </div>
+  );
+}
+
 export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
   const c = problem.content;
 
@@ -61,62 +81,65 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
 
       <h2>Problem Statement</h2>
       <Markdown>{c.statementMd}</Markdown>
+      {c.statementVisualization ? <Visualization visualization={c.statementVisualization} /> : null}
 
       <h2>Input</h2>
       <Markdown>{c.inputMd}</Markdown>
+      {c.inputVisualization ? <Visualization visualization={c.inputVisualization} /> : null}
 
       <h2>Output</h2>
       <Markdown>{c.outputMd}</Markdown>
+      {c.outputVisualization ? <Visualization visualization={c.outputVisualization} /> : null}
 
       <h2>Example</h2>
       <Markdown>{c.exampleMd}</Markdown>
-      {c.exampleExplanationMd ? <Markdown>{c.exampleExplanationMd}</Markdown> : null}
+      {c.exampleVisualization ? <Visualization visualization={c.exampleVisualization} /> : null}
+      {c.exampleExplanationMd ? (
+        <SectionWithViz
+          title="Explanation"
+          md={c.exampleExplanationMd}
+          visualization={c.exampleExplanationVisualization}
+          className="mt-4"
+        />
+      ) : null}
 
       <h2>Brute Force</h2>
-      <h3>Intuition</h3>
-      <Markdown>{c.brute.intuitionMd}</Markdown>
-      <h3>Approach</h3>
-      <Markdown>{c.brute.approachMd}</Markdown>
+      <SectionWithViz title="Intuition" md={c.brute.intuitionMd} visualization={c.brute.intuitionVisualization} />
+      <SectionWithViz title="Approach" md={c.brute.approachMd} visualization={c.brute.approachVisualization} />
       {c.brute.dryRun ? (
-        <>
-          <h3>Dry Run</h3>
-          <Markdown>{c.brute.dryRun}</Markdown>
-        </>
+        <SectionWithViz title="Dry Run" md={c.brute.dryRun} visualization={c.brute.dryRunVisualization} />
       ) : null}
       {c.brute.visualization ? (
-        <>
-          <h3>Visualization</h3>
-          <Visualization visualization={c.brute.visualization} />
-        </>
+        <SectionWithViz title="Visualization" md="" visualization={c.brute.visualization} />
       ) : null}
       <h3>Code (Java)</h3>
       <Markdown>{javaFence(c.brute.codeJava)}</Markdown>
       <ComplexityBadge time={c.brute.time} space={c.brute.space} className="mt-3" />
-      <h3>Complexity Analysis (with explanation)</h3>
-      <Markdown>{c.brute.complexityExplanationMd}</Markdown>
+      <SectionWithViz
+        title="Complexity Analysis"
+        md={c.brute.complexityExplanationMd}
+        visualization={c.brute.complexityVisualization}
+        className="mt-4"
+      />
 
       <h2>Optimal Solution</h2>
-      <h3>Intuition</h3>
-      <Markdown>{c.optimal.intuitionMd}</Markdown>
-      <h3>Approach</h3>
-      <Markdown>{c.optimal.approachMd}</Markdown>
+      <SectionWithViz title="Intuition" md={c.optimal.intuitionMd} visualization={c.optimal.intuitionVisualization} />
+      <SectionWithViz title="Approach" md={c.optimal.approachMd} visualization={c.optimal.approachVisualization} />
       {c.optimal.dryRun ? (
-        <>
-          <h3>Dry Run</h3>
-          <Markdown>{c.optimal.dryRun}</Markdown>
-        </>
+        <SectionWithViz title="Dry Run" md={c.optimal.dryRun} visualization={c.optimal.dryRunVisualization} />
       ) : null}
       {c.optimal.visualization ? (
-        <>
-          <h3>Visualization</h3>
-          <Visualization visualization={c.optimal.visualization} />
-        </>
+        <SectionWithViz title="Visualization" md="" visualization={c.optimal.visualization} />
       ) : null}
       <h3>Code (Java)</h3>
       <Markdown>{javaFence(c.optimal.codeJava)}</Markdown>
       <ComplexityBadge time={c.optimal.time} space={c.optimal.space} className="mt-3" />
-      <h3>Complexity Analysis (with explanation)</h3>
-      <Markdown>{c.optimal.complexityExplanationMd}</Markdown>
+      <SectionWithViz
+        title="Complexity Analysis"
+        md={c.optimal.complexityExplanationMd}
+        visualization={c.optimal.complexityVisualization}
+        className="mt-4"
+      />
 
       <QuickRevision brute={c.quickRevision.brute ?? []} optimal={c.quickRevision.optimal ?? []} />
     </>

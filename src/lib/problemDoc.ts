@@ -1,28 +1,41 @@
 export type ProblemContent = {
   statementMd: string;
+  statementVisualization?: Visualization | null;
   inputMd: string;
+  inputVisualization?: Visualization | null;
   outputMd: string;
+  outputVisualization?: Visualization | null;
   exampleMd: string;
+  exampleVisualization?: Visualization | null;
   exampleExplanationMd: string;
+  exampleExplanationVisualization?: Visualization | null;
   brute: {
     intuitionMd: string;
+    intuitionVisualization?: Visualization | null;
     approachMd: string;
+    approachVisualization?: Visualization | null;
     dryRun?: string;
+    dryRunVisualization?: Visualization | null;
     visualization?: Visualization | null;
     codeJava: string;
     time: string;
     space: string;
     complexityExplanationMd: string;
+    complexityVisualization?: Visualization | null;
   };
   optimal: {
     intuitionMd: string;
+    intuitionVisualization?: Visualization | null;
     approachMd: string;
+    approachVisualization?: Visualization | null;
     dryRun?: string;
+    dryRunVisualization?: Visualization | null;
     visualization?: Visualization | null;
     codeJava: string;
     time: string;
     space: string;
     complexityExplanationMd: string;
+    complexityVisualization?: Visualization | null;
   };
   quickRevision: {
     brute: string[];
