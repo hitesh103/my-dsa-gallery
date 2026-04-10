@@ -8,7 +8,7 @@ export type ProblemContent = {
     intuitionMd: string;
     approachMd: string;
     dryRun?: string;
-    visualization?: FlowVisualization | null;
+    visualization?: Visualization | null;
     codeJava: string;
     time: string;
     space: string;
@@ -18,7 +18,7 @@ export type ProblemContent = {
     intuitionMd: string;
     approachMd: string;
     dryRun?: string;
-    visualization?: FlowVisualization | null;
+    visualization?: Visualization | null;
     codeJava: string;
     time: string;
     space: string;
@@ -43,6 +43,22 @@ export type FlowNode = {
   height?: number;
   sourcePosition?: "top" | "bottom" | "left" | "right";
   targetPosition?: "top" | "bottom" | "left" | "right";
+};
+
+export type ExecutionStep = {
+  step: number;
+  label?: string;
+  description?: string;
+  state?: Record<string, unknown>;
+  action?: string;
+  highlight?: string;
+  payload?: Record<string, unknown>;
+  result?: Record<string, unknown>;
+};
+
+export type ExecutionVisualization = {
+  steps: ExecutionStep[];
+  initialState?: Record<string, unknown>;
 };
 
 export type FlowNodeData = 
@@ -117,25 +133,46 @@ export type FlowVisualizationStep = {
   viewport?: { x: number; y: number; zoom: number };
 };
 
-export type ExecutionStep = {
-  step: number;
-  label?: string;
-  description?: string;
-  state?: Record<string, unknown>;
-  action?: string;
-  highlight?: string;
-  payload?: Record<string, unknown>;
-  result?: Record<string, unknown>;
-};
-
-export type ExecutionVisualization = {
-  steps: ExecutionStep[];
-  initialState?: Record<string, unknown>;
-};
+export type VisualizationEngine = "reactflow" | "mermaid" | "ascii";
 
 export type VisualizationType = "flow" | "execution";
 
-export type FlowVisualization = {
+export type MermaidVisualization = {
+  engine: "mermaid";
+  code: string;
+  title?: string;
+};
+
+export type AsciiVisualization = {
+  engine: "ascii";
+  lines: string[];
+  title?: string;
+};
+
+export type AsciiStep = {
+  label?: string;
+  description?: string;
+  lines: string[];
+};
+
+export type AsciiVisualizationWithSteps = {
+  engine: "ascii";
+  steps: AsciiStep[];
+};
+
+export type MermaidStep = {
+  label?: string;
+  description?: string;
+  code: string;
+};
+
+export type MermaidVisualizationWithSteps = {
+  engine: "mermaid";
+  steps: MermaidStep[];
+};
+
+export type ReactFlowVisualization = {
+  engine?: "reactflow";
   type?: VisualizationType;
   nodes?: FlowNode[];
   edges?: FlowEdge[];
@@ -144,6 +181,15 @@ export type FlowVisualization = {
   flowSteps?: FlowVisualizationStep[];
   executionSteps?: ExecutionStep[];
 };
+
+export type FlowVisualization = ReactFlowVisualization;
+
+export type Visualization = 
+  | ReactFlowVisualization 
+  | MermaidVisualization 
+  | MermaidVisualizationWithSteps
+  | AsciiVisualization 
+  | AsciiVisualizationWithSteps;
 
 export type ProblemDoc = {
   slug: string;

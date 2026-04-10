@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
-import type { FlowVisualization, ProblemContent, ProblemDoc } from "@/lib/problemDoc";
+import type { ProblemContent, ProblemDoc, Visualization } from "@/lib/problemDoc";
 
 type ApiGet = { problem: ProblemDoc } | { error: string };
 
@@ -478,7 +478,30 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted-foreground">
-                Visualization (React Flow JSON)
+                Visualization - Engine
+              </span>
+              <select
+                value={(doc.content.brute.visualization as { engine?: string })?.engine || "reactflow"}
+                onChange={(e) => {
+                  const engine = e.target.value as "reactflow" | "mermaid" | "ascii";
+                  if (engine === "reactflow") {
+                    updateContent({ brute: { ...doc.content.brute, visualization: { engine: "reactflow", nodes: [], edges: [] } } });
+                  } else if (engine === "mermaid") {
+                    updateContent({ brute: { ...doc.content.brute, visualization: { engine: "mermaid", code: "", steps: [] } } });
+                  } else {
+                    updateContent({ brute: { ...doc.content.brute, visualization: { engine: "ascii", lines: [], steps: [] } } });
+                  }
+                }}
+                className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+              >
+                <option value="reactflow">React Flow</option>
+                <option value="mermaid">Mermaid</option>
+                <option value="ascii">ASCII</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                Visualization (JSON/Mermaid/ASCII based on engine)
               </span>
               <textarea
                 value={bruteVizText}
@@ -490,7 +513,7 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
                     return;
                   }
                   try {
-                    const parsed = JSON.parse(raw) as FlowVisualization;
+                    const parsed = JSON.parse(raw) as Visualization;
                     updateContent({ brute: { ...doc.content.brute, visualization: parsed } });
                     setStatus("Visualization updated.");
                   } catch {
@@ -500,7 +523,7 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
                 rows={10}
                 spellCheck={false}
                 className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
-                placeholder={'{"nodes":[{"id":"A","position":{"x":0,"y":0},"data":{"label":"Start"}}],"edges":[]}'}
+                placeholder={'React Flow: {"engine":"reactflow","nodes":[],"edges":[]}\nMermaid: {"engine":"mermaid","code":"graph TD;A-->B","steps":[]}\nASCII: {"engine":"ascii","lines":["  A  "," /|\\ "], "steps":[]}'}
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -598,7 +621,30 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
             </label>
             <label className="flex flex-col gap-1">
               <span className="text-xs font-medium text-muted-foreground">
-                Visualization (React Flow JSON)
+                Visualization - Engine
+              </span>
+              <select
+                value={(doc.content.optimal.visualization as { engine?: string })?.engine || "reactflow"}
+                onChange={(e) => {
+                  const engine = e.target.value as "reactflow" | "mermaid" | "ascii";
+                  if (engine === "reactflow") {
+                    updateContent({ optimal: { ...doc.content.optimal, visualization: { engine: "reactflow", nodes: [], edges: [] } } });
+                  } else if (engine === "mermaid") {
+                    updateContent({ optimal: { ...doc.content.optimal, visualization: { engine: "mermaid", code: "", steps: [] } } });
+                  } else {
+                    updateContent({ optimal: { ...doc.content.optimal, visualization: { engine: "ascii", lines: [], steps: [] } } });
+                  }
+                }}
+                className="h-10 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+              >
+                <option value="reactflow">React Flow</option>
+                <option value="mermaid">Mermaid</option>
+                <option value="ascii">ASCII</option>
+              </select>
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-medium text-muted-foreground">
+                Visualization (JSON/Mermaid/ASCII based on engine)
               </span>
               <textarea
                 value={optimalVizText}
@@ -610,7 +656,7 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
                     return;
                   }
                   try {
-                    const parsed = JSON.parse(raw) as FlowVisualization;
+                    const parsed = JSON.parse(raw) as Visualization;
                     updateContent({ optimal: { ...doc.content.optimal, visualization: parsed } });
                     setStatus("Visualization updated.");
                   } catch {
@@ -620,7 +666,7 @@ export function ProblemEditorClient({ slug }: { slug: string }) {
                 rows={10}
                 spellCheck={false}
                 className="font-mono rounded-lg border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-ring/30"
-                placeholder={'{"nodes":[{"id":"A","position":{"x":0,"y":0},"data":{"label":"Start"}}],"edges":[]}'}
+                placeholder={'React Flow: {"engine":"reactflow","nodes":[],"edges":[]}\nMermaid: {"engine":"mermaid","code":"graph TD;A-->B","steps":[]}\nASCII: {"engine":"ascii","lines":["  A  "," /|\\ "], "steps":[]}'}
               />
             </label>
             <label className="flex flex-col gap-1">
