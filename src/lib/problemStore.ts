@@ -274,12 +274,13 @@ export async function upsertProblem(problem: ProblemDoc): Promise<void> {
   const now = new Date().toISOString();
   const contentJson = JSON.stringify(problem.content);
   const searchText = computeSearchText(problem);
+  const isRevisionReady = isProblemRevisionReady(problem) ? 1 : 0;
 
   await db
     .prepare(
       `
-      INSERT INTO problems (slug, title, topic, pattern, link, content_json, search_text, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT created_at FROM problems WHERE slug = ?), ?), ?)
+      INSERT INTO problems (slug, title, topic, pattern, link, content_json, search_text, is_revision_ready, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT is_revision_ready FROM problems WHERE slug = ?), ?), COALESCE((SELECT created_at FROM problems WHERE slug = ?), ?), ?)
       ON CONFLICT(slug) DO UPDATE SET
         title = excluded.title,
         topic = excluded.topic,
@@ -287,6 +288,7 @@ export async function upsertProblem(problem: ProblemDoc): Promise<void> {
         link = excluded.link,
         content_json = excluded.content_json,
         search_text = excluded.search_text,
+        is_revision_ready = excluded.is_revision_ready,
         updated_at = excluded.updated_at;
     `,
     )
@@ -298,11 +300,35 @@ export async function upsertProblem(problem: ProblemDoc): Promise<void> {
       problem.link,
       contentJson,
       searchText,
+      isRevisionReady,
+      problem.slug,
+      isRevisionReady,
       problem.slug,
       now,
       now,
     )
     .run();
+}
+
+function isProblemRevisionReady(problem: ProblemDoc): boolean {
+  const { content } = problem;
+  if (!content) return false;
+  const missingParts: string[] = [];
+  if (!content.statementMd) missingParts.push("statementMd");
+  if (!content.inputMd) missingParts.push("inputMd");
+  if (!content.outputMd) missingParts.push("outputMd");
+  if (!content.exampleMd) missingParts.push("exampleMd");
+  if (!content.brute?.intuitionMd) missingParts.push("brute.intuitionMd");
+  if (!content.brute?.approachMd) missingParts.push("brute.approachMd");
+  if (!content.brute?.codeJava) missingParts.push("brute.codeJava");
+  if (!content.brute?.time) missingParts.push("brute.time");
+  if (!content.brute?.space) missingParts.push("brute.space");
+  if (!content.optimal?.intuitionMd) missingParts.push("optimal.intuitionMd");
+  if (!content.optimal?.approachMd) missingParts.push("optimal.approachMd");
+  if (!content.optimal?.codeJava) missingParts.push("optimal.codeJava");
+  if (!content.optimal?.time) missingParts.push("optimal.time");
+  if (!content.optimal?.space) missingParts.push("optimal.space");
+  return missingParts.length === 0;
 }
 
 export async function deleteProblem(slug: string): Promise<void> {
