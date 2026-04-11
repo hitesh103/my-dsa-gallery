@@ -18,6 +18,8 @@ export type AdminProblemSummary = ProblemMeta & {
   missingParts: string[];
 };
 
+export const PUBLIC_PROBLEM_MIN_COMPLETENESS = 50;
+
 function safeJsonParse<T>(value: string): T {
   return JSON.parse(value) as T;
 }
@@ -80,7 +82,7 @@ function nonEmpty(value: string | null | undefined) {
   return Boolean(value?.trim());
 }
 
-export function toAdminProblemSummary(problem: ProblemDoc): AdminProblemSummary {
+function getProblemCompleteness(problem: ProblemDoc) {
   const checks = [
     { label: "link", ok: nonEmpty(problem.link) },
     { label: "statement", ok: nonEmpty(problem.content.statementMd) },
@@ -109,6 +111,12 @@ export function toAdminProblemSummary(problem: ProblemDoc): AdminProblemSummary 
   const completenessScore = Math.round((completedChecks / checks.length) * 100);
   const missingParts = checks.filter((check) => !check.ok).map((check) => check.label);
 
+  return { completenessScore, missingParts };
+}
+
+export function toAdminProblemSummary(problem: ProblemDoc): AdminProblemSummary {
+  const { completenessScore, missingParts } = getProblemCompleteness(problem);
+
   return {
     slug: problem.slug,
     title: problem.title,
@@ -119,6 +127,20 @@ export function toAdminProblemSummary(problem: ProblemDoc): AdminProblemSummary 
     completenessScore,
     isRevisionReady: missingParts.length === 0,
     missingParts,
+  };
+}
+
+function toProblemMeta(problem: ProblemDoc): ProblemMeta {
+  const { completenessScore } = getProblemCompleteness(problem);
+  return {
+    slug: problem.slug,
+    title: problem.title,
+    topic: problem.topic,
+    pattern: problem.pattern,
+    link: problem.link,
+    updatedAt: problem.updatedAt,
+    isRevisionReady: completenessScore >= PUBLIC_PROBLEM_MIN_COMPLETENESS,
+    completenessScore,
   };
 }
 
@@ -153,8 +175,15 @@ export async function listProblems({
 
   if (match) {
     const sql = `
-      SELECT p.slug, p.title, p.topic, p.pattern, p.link, p.updated_at as updatedAt,
-             p.is_revision_ready as isRevisionReady
+      SELECT
+        p.slug,
+        p.title,
+        p.topic,
+        p.pattern,
+        p.link,
+        p.content_json,
+        p.created_at,
+        p.updated_at
       FROM problems p
       JOIN problems_fts f ON f.slug = p.slug
       WHERE problems_fts MATCH ?
@@ -165,21 +194,34 @@ export async function listProblems({
     const out = await db
       .prepare(sql)
       .bind(match, ...binds, capped)
-      .all<ProblemMeta>();
-    return out.results;
+      .all<ProblemRow>();
+    return out.results
+      .map((row) => rowToProblem(row))
+      .map((problem) => toProblemMeta(problem))
+      .filter((problem) => (problem.completenessScore ?? 0) >= PUBLIC_PROBLEM_MIN_COMPLETENESS);
   }
 
   // Fallback: no search (or empty query) => plain indexed scan.
   const sql = `
-    SELECT p.slug, p.title, p.topic, p.pattern, p.link, p.updated_at as updatedAt,
-           p.is_revision_ready as isRevisionReady
+    SELECT
+      p.slug,
+      p.title,
+      p.topic,
+      p.pattern,
+      p.link,
+      p.content_json,
+      p.created_at,
+      p.updated_at
     FROM problems p
     ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
     ORDER BY p.updated_at DESC
     LIMIT ?;
   `;
-  const out = await db.prepare(sql).bind(...binds, capped).all<ProblemMeta>();
-  return out.results;
+  const out = await db.prepare(sql).bind(...binds, capped).all<ProblemRow>();
+  return out.results
+    .map((row) => rowToProblem(row))
+    .map((problem) => toProblemMeta(problem))
+    .filter((problem) => (problem.completenessScore ?? 0) >= PUBLIC_PROBLEM_MIN_COMPLETENESS);
 }
 
 export async function getProblem(slug: string): Promise<ProblemDoc | null> {
