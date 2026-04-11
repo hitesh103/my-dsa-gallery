@@ -62,13 +62,25 @@ type MermaidRendererProps = {
 export function MermaidRenderer({ code, className }: MermaidRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>("");
+  const [isDark, setIsDark] = useState(() => getIsDark());
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(getIsDark());
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const render = async () => {
       if (!containerRef.current || !code.trim()) return;
-      
-      mermaid.initialize(getIsDark() ? darkTheme as Parameters<typeof mermaid.initialize>[0] : lightTheme as Parameters<typeof mermaid.initialize>[0]);
-      
+
+      mermaid.initialize(isDark ? darkTheme as Parameters<typeof mermaid.initialize>[0] : lightTheme as Parameters<typeof mermaid.initialize>[0]);
+
       try {
         const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
         const { svg } = await mermaid.render(id, code);
@@ -79,7 +91,7 @@ export function MermaidRenderer({ code, className }: MermaidRendererProps) {
       }
     };
     void render();
-  }, [code]);
+  }, [code, isDark]);
 
   if (!code.trim()) return null;
 
@@ -100,13 +112,25 @@ type MermaidStepperProps = {
 export function MermaidStepper({ steps, className }: MermaidStepperProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [renderedSvgs, setRenderedSvgs] = useState<Map<number, string>>(new Map());
+  const [isDark, setIsDark] = useState(() => getIsDark());
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(getIsDark());
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const renderStep = async (index: number, code: string) => {
       if (renderedSvgs.has(index)) return;
-      
-      mermaid.initialize(getIsDark() ? darkTheme as Parameters<typeof mermaid.initialize>[0] : lightTheme as Parameters<typeof mermaid.initialize>[0]);
-      
+
+      mermaid.initialize(isDark ? darkTheme as Parameters<typeof mermaid.initialize>[0] : lightTheme as Parameters<typeof mermaid.initialize>[0]);
+
       try {
         const id = `mermaid-step-${index}-${Math.random().toString(36).slice(2, 9)}`;
         const { svg } = await mermaid.render(id, code);
@@ -119,7 +143,7 @@ export function MermaidStepper({ steps, className }: MermaidStepperProps) {
     if (steps[currentStep]) {
       void renderStep(currentStep, steps[currentStep].code);
     }
-  }, [currentStep, steps, renderedSvgs]);
+  }, [currentStep, steps, renderedSvgs, isDark]);
 
   const goNext = () => setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
   const goPrev = () => setCurrentStep((s) => Math.max(s - 1, 0));
