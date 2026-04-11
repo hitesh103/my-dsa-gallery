@@ -9,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { ProblemMeta } from "@/lib/problemDoc";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
 
+type ProblemWithComplete = ProblemMeta & {
+  isComplete?: boolean;
+};
+
 function uniqSorted(items: string[]) {
   return Array.from(new Set(items)).sort((a, b) => a.localeCompare(b));
 }
@@ -28,7 +32,15 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
   const [topic, setTopic] = useState<string>("all");
   const [pattern, setPattern] = useState<string>("all");
   const [view, setView] = useState<"grouped" | "board" | "list">("grouped");
-  const [remote, setRemote] = useState<ProblemMeta[] | null>(null);
+  const [showIncomplete, setShowIncomplete] = useState(false);
+  const [remote, setRemote] = useState<ProblemWithComplete[] | null>(null);
+
+  const problemsWithComplete = useMemo(() => {
+    return problems.map((p) => {
+      const isComplete = Boolean(p.title && p.topic && p.pattern);
+      return { ...p, isComplete };
+    });
+  }, [problems]);
 
   useEffect(() => {
     try {
@@ -49,10 +61,10 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
     }
   }, [view]);
 
-  const topics = useMemo(() => uniqSorted(problems.map((p) => p.topic)), [problems]);
+  const topics = useMemo(() => uniqSorted(problemsWithComplete.map((p) => p.topic)), [problemsWithComplete]);
   const patterns = useMemo(
-    () => uniqSorted(problems.map((p) => p.pattern)),
-    [problems],
+    () => uniqSorted(problemsWithComplete.map((p) => p.pattern)),
+    [problemsWithComplete],
   );
 
   const dq = useDebouncedValue(q, 250);
@@ -95,13 +107,14 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
     };
   }, [dq, dTopic, dPattern]);
 
-  const baseList = remote ?? problems;
+  const baseList = remote ?? problemsWithComplete;
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     return baseList.filter((p) => {
       if (topic !== "all" && p.topic !== topic) return false;
       if (pattern !== "all" && p.pattern !== pattern) return false;
+      if (!showIncomplete && p.isComplete === false) return false;
       if (!query) return true;
       return (
         p.title.toLowerCase().includes(query) ||
@@ -110,7 +123,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
         p.pattern.toLowerCase().includes(query)
       );
     });
-  }, [baseList, q, topic, pattern]);
+  }, [baseList, q, topic, pattern, showIncomplete]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, ProblemMeta[]>();
@@ -165,29 +178,40 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
           </CardHeader>
           <CardContent>
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                View:
-                <button
-                  type="button"
-                  onClick={() => setView("grouped")}
-                  className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "grouped" ? "bg-muted text-foreground" : ""}`}
-                >
-                  Grouped
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setView("board")}
-                  className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "board" ? "bg-muted text-foreground" : ""}`}
-                >
-                  Board
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setView("list")}
-                  className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "list" ? "bg-muted text-foreground" : ""}`}
-                >
-                  List
-                </button>
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  View:
+                  <button
+                    type="button"
+                    onClick={() => setView("grouped")}
+                    className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "grouped" ? "bg-muted text-foreground" : ""}`}
+                  >
+                    Grouped
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setView("board")}
+                    className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "board" ? "bg-muted text-foreground" : ""}`}
+                  >
+                    Board
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setView("list")}
+                    className={`rounded-md border px-2 py-1 font-medium hover:bg-muted ${view === "list" ? "bg-muted text-foreground" : ""}`}
+                  >
+                    List
+                  </button>
+                </div>
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={showIncomplete}
+                    onChange={(e) => setShowIncomplete(e.target.checked)}
+                    className="h-4 w-4 rounded border"
+                  />
+                  <span className="text-muted-foreground">Show incomplete</span>
+                </label>
               </div>
             </div>
 

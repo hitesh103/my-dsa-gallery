@@ -6,8 +6,25 @@ import { AppShell } from "@/components/ui/AppShell";
 import { ClarityInitializer } from "@/components/analytics/ClarityInitializer";
 
 export const metadata: Metadata = {
-  title: "My DSA Gallery",
-  description: "Minimalist DSA + Study Gallery",
+  title: {
+    default: "DSA Problems Gallery",
+    template: "%s | DSA Gallery",
+  },
+  description: "Collection of Data Structures and Algorithms problems with detailed solutions, brute force, optimal approaches, and quick revision notes.",
+  keywords: ["DSA", "algorithms", "data structures", "coding problems", "LeetCode", "GeeksforGeeks", "practice", "interview prep"],
+  authors: [{ name: "Hitesh Prajapati" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    siteName: "DSA Problems Gallery",
+  },
+  twitter: {
+    card: "summary_large_image",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
   icons: {
     icon: "/icon.svg",
   },
