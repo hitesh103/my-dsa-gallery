@@ -153,7 +153,8 @@ export async function listProblems({
 
   if (match) {
     const sql = `
-      SELECT p.slug, p.title, p.topic, p.pattern, p.link, p.updated_at as updatedAt
+      SELECT p.slug, p.title, p.topic, p.pattern, p.link, p.updated_at as updatedAt,
+             p.is_revision_ready as isRevisionReady
       FROM problems p
       JOIN problems_fts f ON f.slug = p.slug
       WHERE problems_fts MATCH ?
@@ -170,7 +171,8 @@ export async function listProblems({
 
   // Fallback: no search (or empty query) => plain indexed scan.
   const sql = `
-    SELECT p.slug, p.title, p.topic, p.pattern, p.link, p.updated_at as updatedAt
+    SELECT p.slug, p.title, p.topic, p.pattern, p.link, p.updated_at as updatedAt,
+           p.is_revision_ready as isRevisionReady
     FROM problems p
     ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
     ORDER BY p.updated_at DESC

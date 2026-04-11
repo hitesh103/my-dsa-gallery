@@ -217,4 +217,5 @@ export type ProblemDoc = {
 
 export type ProblemMeta = Pick<ProblemDoc, "slug" | "title" | "topic" | "pattern" | "link"> & {
   updatedAt?: string;
+  isRevisionReady?: boolean;
 };

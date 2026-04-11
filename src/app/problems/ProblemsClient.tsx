@@ -33,6 +33,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
   const [pattern, setPattern] = useState<string>("all");
   const [view, setView] = useState<"grouped" | "board" | "list">("grouped");
   const [showIncomplete, setShowIncomplete] = useState(false);
+  const [showNeedsWork, setShowNeedsWork] = useState(false);
   const [remote, setRemote] = useState<ProblemWithComplete[] | null>(null);
 
   const problemsWithComplete = useMemo(() => {
@@ -115,6 +116,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
       if (topic !== "all" && p.topic !== topic) return false;
       if (pattern !== "all" && p.pattern !== pattern) return false;
       if (!showIncomplete && p.isComplete === false) return false;
+      if (!showNeedsWork && p.isRevisionReady === false) return false;
       if (!query) return true;
       return (
         p.title.toLowerCase().includes(query) ||
@@ -123,7 +125,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
         p.pattern.toLowerCase().includes(query)
       );
     });
-  }, [baseList, q, topic, pattern, showIncomplete]);
+  }, [baseList, q, topic, pattern, showIncomplete, showNeedsWork]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, ProblemMeta[]>();
@@ -211,6 +213,15 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                     className="h-4 w-4 rounded border"
                   />
                   <span className="text-muted-foreground">Show incomplete</span>
+                </label>
+                <label className="flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={showNeedsWork}
+                    onChange={(e) => setShowNeedsWork(e.target.checked)}
+                    className="h-4 w-4 rounded border"
+                  />
+                  <span className="text-muted-foreground">Needs work</span>
                 </label>
               </div>
             </div>
