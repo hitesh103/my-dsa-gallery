@@ -322,7 +322,7 @@ export async function upsertProblem(problem: ProblemDoc): Promise<void> {
     .prepare(
       `
       INSERT INTO problems (slug, title, topic, pattern, link, content_json, search_text, is_revision_ready, created_at, updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT is_revision_ready FROM problems WHERE slug = ?), ?), COALESCE((SELECT created_at FROM problems WHERE slug = ?), ?), ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, COALESCE((SELECT is_revision_ready FROM problems WHERE slug = ?), ?), COALESCE((SELECT created_at FROM problems WHERE slug = ?), ?), ?)
       ON CONFLICT(slug) DO UPDATE SET
         title = excluded.title,
         topic = excluded.topic,
@@ -342,7 +342,6 @@ export async function upsertProblem(problem: ProblemDoc): Promise<void> {
       problem.link,
       contentJson,
       searchText,
-      isRevisionReady,
       problem.slug,
       isRevisionReady,
       problem.slug,
