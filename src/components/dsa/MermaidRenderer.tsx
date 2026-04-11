@@ -5,51 +5,11 @@ import mermaid from "mermaid";
 import type { MermaidStep } from "@/lib/problemDoc";
 import { cn } from "@/lib/cn";
 
-const lightTheme = {
+mermaid.initialize({
   startOnLoad: false,
-  theme: "base",
-  themeVariables: {
-    primaryColor: "#3b82f6",
-    primaryTextColor: "#ffffff",
-    primaryBorderColor: "#2563eb",
-    lineColor: "#1e293b",
-    secondaryColor: "#22c55e",
-    tertiaryColor: "#fca5a5",
-    background: "#ffffff",
-    mainBkg: "#f8fafc",
-    secondBkg: "#f1f5f9",
-    border1: "#e2e8f0",
-    border2: "#cbd5e1",
-    textColor: "#1e293b",
-    fontFamily: "inherit",
-  },
   securityLevel: "loose",
   fontFamily: "inherit",
-};
-
-const darkTheme = {
-  startOnLoad: false,
-  theme: "base",
-  themeVariables: {
-    primaryColor: "#60a5fa",
-    primaryTextColor: "#1e293b",
-    primaryBorderColor: "#3b82f6",
-    lineColor: "#e2e8f0",
-    secondaryColor: "#4ade80",
-    tertiaryColor: "#f87171",
-    background: "#0f172a",
-    mainBkg: "#1e293b",
-    secondBkg: "#334155",
-    border1: "#475569",
-    border2: "#64748b",
-    textColor: "#f1f5f9",
-    fontFamily: "inherit",
-  },
-  securityLevel: "loose",
-  fontFamily: "inherit",
-};
-
-mermaid.initialize(lightTheme as Parameters<typeof mermaid.initialize>[0]);
+});
 
 function getIsDark(): boolean {
   if (typeof document === "undefined") return false;
@@ -65,6 +25,7 @@ export function MermaidRenderer({ code, className }: MermaidRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>("");
   const [isDark, setIsDark] = useState(() => getIsDark());
+  const initialized = useRef(false);
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
@@ -81,7 +42,22 @@ export function MermaidRenderer({ code, className }: MermaidRendererProps) {
     const render = async () => {
       if (!containerRef.current || !code.trim()) return;
 
-      mermaid.initialize(isDark ? darkTheme as Parameters<typeof mermaid.initialize>[0] : lightTheme as Parameters<typeof mermaid.initialize>[0]);
+      if (!initialized.current) {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: isDark ? "dark" : "default",
+          securityLevel: "loose",
+          fontFamily: "inherit",
+        });
+        initialized.current = true;
+      } else {
+        mermaid.initialize({
+          startOnLoad: false,
+          theme: isDark ? "dark" : "default",
+          securityLevel: "loose",
+          fontFamily: "inherit",
+        });
+      }
 
       try {
         const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
@@ -100,7 +76,11 @@ export function MermaidRenderer({ code, className }: MermaidRendererProps) {
   return (
     <div
       ref={containerRef}
-      className={cn("overflow-x-auto p-4", className)}
+      className={cn(
+        "overflow-x-auto p-4 rounded-md",
+        isDark ? "bg-slate-900" : "bg-slate-50",
+        className
+      )}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   );
@@ -131,7 +111,12 @@ export function MermaidStepper({ steps, className }: MermaidStepperProps) {
     const renderStep = async (index: number, code: string) => {
       if (renderedSvgs.has(index)) return;
 
-      mermaid.initialize(isDark ? darkTheme as Parameters<typeof mermaid.initialize>[0] : lightTheme as Parameters<typeof mermaid.initialize>[0]);
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: isDark ? "dark" : "default",
+        securityLevel: "loose",
+        fontFamily: "inherit",
+      });
 
       try {
         const id = `mermaid-step-${index}-${Math.random().toString(36).slice(2, 9)}`;
@@ -185,7 +170,12 @@ export function MermaidStepper({ steps, className }: MermaidStepperProps) {
         </div>
       )}
 
-      <div className="min-h-[200px] overflow-x-auto p-4">
+      <div
+        className={cn(
+          "min-h-[200px] overflow-x-auto p-4 rounded-b-md",
+          isDark ? "bg-slate-900" : "bg-slate-50"
+        )}
+      >
         {renderedSvgs.get(currentStep) ? (
           <div dangerouslySetInnerHTML={{ __html: renderedSvgs.get(currentStep)! }} />
         ) : (
