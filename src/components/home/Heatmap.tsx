@@ -11,17 +11,27 @@ type HeatmapData = {
 };
 
 const LEVELS = [
-  { threshold: 0, label: "No problems", className: "bg-muted" },
-  { threshold: 1, label: "1-2 problems", className: "bg-green-200 dark:bg-green-900" },
-  { threshold: 3, label: "3-4 problems", className: "bg-green-300 dark:bg-green-700" },
-  { threshold: 5, label: "5+ problems", className: "bg-green-400 dark:bg-green-500" },
+  { label: "0", className: "bg-[#161b22]" },
+  { label: "1", className: "bg-[#1a472a]" },
+  { label: "2", className: "bg-[#2d6a4f]" },
+  { label: "3", className: "bg-[#40916c]" },
+  { label: "4", className: "bg-[#7b2cbf]" },
+  { label: "5", className: "bg-[#5a189a]" },
+  { label: "6", className: "bg-[#b5451b]" },
+  { label: "7", className: "bg-[#9b2226]" },
+  { label: "8+", className: "bg-[#d4a017]" },
 ];
 
 function getLevel(count: number) {
   if (count === 0) return 0;
-  if (count <= 2) return 1;
-  if (count <= 4) return 2;
-  return 3;
+  if (count === 1) return 1;
+  if (count === 2) return 2;
+  if (count === 3) return 3;
+  if (count === 4) return 4;
+  if (count === 5) return 5;
+  if (count === 6) return 6;
+  if (count === 7) return 7;
+  return 8;
 }
 
 function getWeeks(years: number) {
@@ -49,7 +59,9 @@ function getWeeks(years: number) {
 }
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const CELL_SIZE = 11;
+const CELL_GAP = 2;
+const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
 
 export function Heatmap({ years = 1 }: { years?: number }) {
   const [data, setData] = useState<HeatmapData[]>([]);
@@ -76,9 +88,7 @@ export function Heatmap({ years = 1 }: { years?: number }) {
   const dataMap = new Map(data.map((d) => [d.date, d.count]));
 
   const weeks = getWeeks(years);
-
   const totalProblems = data.reduce((sum, d) => sum + d.count, 0);
-  const activeDays = data.filter((d) => d.count > 0).length;
 
   const monthLabels: { label: string; offset: number }[] = [];
   let lastMonth = -1;
@@ -115,38 +125,98 @@ export function Heatmap({ years = 1 }: { years?: number }) {
         {isLoading ? (
           <div className="h-32 animate-pulse rounded-md bg-muted" />
         ) : (
-          <div className="relative overflow-x-auto pb-2">
-            <div className="inline-block min-w-max">
-              <div className="flex gap-4 mb-1 ml-8">
-                {monthLabels.map(({ label, offset }) => (
-                  <span
-                    key={`${label}-${offset}`}
-                    className="text-[10px] text-muted-foreground"
-                    style={{ marginLeft: offset === 0 ? 0 : undefined }}
-                  >
-                    {label}
-                  </span>
-                ))}
+          <div className="overflow-x-auto">
+            <div
+              style={{
+                display: "inline-flex",
+                flexDirection: "column",
+                gap: CELL_GAP,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  gap: CELL_GAP,
+                  paddingLeft: 28,
+                  height: 16,
+                  position: "relative",
+                }}
+              >
+                {monthLabels.map(({ label, offset }, idx) => {
+                  const nextLabel = monthLabels[idx + 1];
+                  const maxWidth = nextLabel
+                    ? (nextLabel.offset - offset) * (CELL_SIZE + CELL_GAP)
+                    : undefined;
+
+                  return (
+                    <span
+                      key={`${label}-${offset}`}
+                      style={{
+                        position: "absolute",
+                        left: offset * (CELL_SIZE + CELL_GAP),
+                        fontSize: 10,
+                        color: "hsl(var(--muted-foreground))",
+                        lineHeight: "16px",
+                        maxWidth: maxWidth ? maxWidth - 4 : undefined,
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {label}
+                    </span>
+                  );
+                })}
               </div>
 
-              <div className="flex gap-[3px]">
-                <div className="flex flex-col gap-[3px] mr-1">
-                  {DAYS.map((day, i) => (
-                    <span
-                      key={day}
-                      className="text-[10px] text-muted-foreground leading-[13px]"
-                      style={{ height: "13px", display: day === "Sun" || day === "Tue" || day === "Thu" || day === "Sat" ? "block" : "none" }}
+              <div style={{ display: "flex", gap: CELL_GAP }}>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: CELL_GAP,
+                    marginRight: 4,
+                    width: 24,
+                  }}
+                >
+                  {DAY_LABELS.map((label, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        height: CELL_SIZE,
+                        display: "flex",
+                        alignItems: "center",
+                        fontSize: 9,
+                        color: "hsl(var(--muted-foreground))",
+                        lineHeight: `${CELL_SIZE}px`,
+                        justifyContent: "flex-end",
+                      }}
                     >
-                      {i % 2 === 1 ? day[0] : ""}
-                    </span>
+                      {label}
+                    </div>
                   ))}
                 </div>
 
                 {weeks.map((week, wi) => (
-                  <div key={wi} className="flex flex-col gap-[3px]">
+                  <div
+                    key={wi}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: CELL_GAP,
+                    }}
+                  >
                     {week.map((day, di) => {
                       if (!day) {
-                        return <div key={di} className="w-[13px] h-[13px]" />;
+                        return (
+                          <div
+                            key={di}
+                            style={{
+                              width: CELL_SIZE,
+                              height: CELL_SIZE,
+                              borderRadius: 2,
+                            }}
+                          />
+                        );
                       }
                       const dateStr = day.toISOString().split("T")[0];
                       const count = dataMap.get(dateStr) ?? 0;
@@ -156,12 +226,21 @@ export function Heatmap({ years = 1 }: { years?: number }) {
                         <div
                           key={di}
                           className={cn(
-                            "w-[13px] h-[13px] rounded-sm cursor-pointer transition-opacity hover:opacity-80",
+                            "rounded cursor-pointer transition-opacity hover:opacity-80",
                             LEVELS[level].className
                           )}
+                          style={{
+                            width: CELL_SIZE,
+                            height: CELL_SIZE,
+                          }}
                           onMouseEnter={(e) => {
                             const rect = e.currentTarget.getBoundingClientRect();
-                            setTooltip({ date: dateStr, count, x: rect.left + rect.width / 2, y: rect.top });
+                            setTooltip({
+                              date: dateStr,
+                              count,
+                              x: rect.left + rect.width / 2,
+                              y: rect.top,
+                            });
                           }}
                           onMouseLeave={() => setTooltip(null)}
                         />
@@ -171,12 +250,26 @@ export function Heatmap({ years = 1 }: { years?: number }) {
                 ))}
               </div>
 
-              <div className="flex items-center justify-end gap-2 mt-3 text-[10px] text-muted-foreground">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                  gap: 4,
+                  marginTop: 4,
+                  fontSize: 9,
+                  color: "hsl(var(--muted-foreground))",
+                }}
+              >
                 <span>Less</span>
                 {LEVELS.map((lvl, i) => (
                   <div
                     key={i}
-                    className={cn("w-[13px] h-[13px] rounded-sm", lvl.className)}
+                    className={cn("rounded", lvl.className)}
+                    style={{
+                      width: CELL_SIZE,
+                      height: CELL_SIZE,
+                    }}
                   />
                 ))}
                 <span>More</span>
@@ -188,14 +281,23 @@ export function Heatmap({ years = 1 }: { years?: number }) {
 
       {tooltip && (
         <div
-          className="fixed z-50 px-2 py-1 text-xs bg-foreground text-background rounded shadow-lg pointer-events-none"
           style={{
+            position: "fixed",
+            zIndex: 50,
+            padding: "4px 8px",
+            fontSize: 11,
+            background: "hsl(var(--foreground))",
+            color: "hsl(var(--background))",
+            borderRadius: 4,
+            boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+            pointerEvents: "none",
             left: tooltip.x,
-            top: tooltip.y - 8,
+            top: tooltip.y - 6,
             transform: "translate(-50%, -100%)",
+            whiteSpace: "nowrap",
           }}
         >
-          <span className="font-medium">{tooltip.count}</span> problem{tooltip.count !== 1 ? "s" : ""} on{" "}
+          <span style={{ fontWeight: 600 }}>{tooltip.count}</span> problem{tooltip.count !== 1 ? "s" : ""} on{" "}
           {new Date(tooltip.date + "T00:00:00").toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
