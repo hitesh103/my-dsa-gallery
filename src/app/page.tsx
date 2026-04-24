@@ -8,7 +8,7 @@ export default function Home() {
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 sm:gap-10 px-4 py-8 sm:py-14 pb-24 sm:pb-14">
       <section className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
         <div className="flex flex-col gap-4">
-          <Heatmap years={2} />
+          <Heatmap years={3} />
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium text-muted-foreground">
               Personal workspace
