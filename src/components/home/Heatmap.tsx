@@ -24,8 +24,8 @@ type TooltipState = {
 type WeekColumn = {
   days: Array<Date | null>;
   label: string | null;
-  x: string;
-  marginLeft: string;
+  startColumn: number;
+  gapCountBefore: number;
 };
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -75,12 +75,11 @@ function getWeeksForYear(year: number): WeekColumn[] {
 
   const columns: WeekColumn[] = [];
   let current = new Date(gridStart);
-  let monthGapCount = 0;
+  let gapCountBefore = 0;
 
   while (current <= gridEnd) {
     const weekDays: Array<Date | null> = [];
     let label: string | null = null;
-    let marginLeft = "0px";
 
     for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
       const day = new Date(current);
@@ -89,8 +88,7 @@ function getWeeksForYear(year: number): WeekColumn[] {
       if (isInYear && day.getDate() === 1) {
         label = MONTHS[day.getMonth()];
         if (columns.length > 0) {
-          marginLeft = MONTH_GAP;
-          monthGapCount += 1;
+          gapCountBefore += 1;
         }
       }
 
@@ -101,8 +99,8 @@ function getWeeksForYear(year: number): WeekColumn[] {
     columns.push({
       days: weekDays,
       label,
-      x: `calc(${columns.length} * (${CELL_SIZE} + ${CELL_GAP}) + ${monthGapCount} * ${MONTH_GAP})`,
-      marginLeft,
+      startColumn: columns.length + 1,
+      gapCountBefore,
     });
   }
 
@@ -199,13 +197,12 @@ export function Heatmap({ years = 3 }: HeatmapProps) {
             >
               <div
                 style={{
-                  display: "flex",
                   height: 18,
                   paddingLeft: DAY_LABEL_WIDTH + 6,
                   position: "relative",
                 }}
               >
-                {weekColumns.map(({ label, x }, index) => {
+                {weekColumns.map(({ label, startColumn, gapCountBefore }, index) => {
                   if (!label) return null;
 
                   return (
@@ -213,7 +210,7 @@ export function Heatmap({ years = 3 }: HeatmapProps) {
                       key={`${label}-${index}`}
                       style={{
                         position: "absolute",
-                        left: x,
+                        left: `calc((${startColumn - 1} * (${CELL_SIZE} + ${CELL_GAP})) + ${gapCountBefore} * ${MONTH_GAP})`,
                         fontSize: 10,
                         lineHeight: "18px",
                         color: "hsl(var(--muted-foreground))",
@@ -226,14 +223,13 @@ export function Heatmap({ years = 3 }: HeatmapProps) {
                 })}
               </div>
 
-              <div style={{ display: "flex", gap: CELL_GAP }}>
+              <div style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
                 <div
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: CELL_GAP,
+                    display: "grid",
+                    gridTemplateRows: `repeat(7, ${CELL_SIZE})`,
+                    rowGap: CELL_GAP,
                     width: DAY_LABEL_WIDTH,
-                    marginRight: 6,
                   }}
                 >
                   {DAY_LABELS.map((label, index) => (
@@ -254,64 +250,75 @@ export function Heatmap({ years = 3 }: HeatmapProps) {
                   ))}
                 </div>
 
-                {weekColumns.map(({ days, marginLeft }, weekIndex) => (
-                  <div
-                    key={weekIndex}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: CELL_GAP,
-                      marginLeft,
-                    }}
-                  >
-                    {days.map((day, dayIndex) => {
-                      if (!day) {
+                <div
+                  style={{
+                    display: "grid",
+                    gridAutoFlow: "column",
+                    gridAutoColumns: CELL_SIZE,
+                    gridTemplateRows: `repeat(7, ${CELL_SIZE})`,
+                    columnGap: CELL_GAP,
+                    rowGap: CELL_GAP,
+                  }}
+                >
+                  {weekColumns.map((week, weekIndex) => (
+                    <div
+                      key={weekIndex}
+                      style={{
+                        display: "grid",
+                        gridTemplateRows: `repeat(7, ${CELL_SIZE})`,
+                        rowGap: CELL_GAP,
+                        marginLeft: week.label && weekIndex > 0 ? MONTH_GAP : "0px",
+                      }}
+                    >
+                      {week.days.map((day, dayIndex) => {
+                        if (!day) {
+                          return (
+                            <div
+                              key={dayIndex}
+                              style={{
+                                width: CELL_SIZE,
+                                height: CELL_SIZE,
+                              }}
+                            />
+                          );
+                        }
+
+                        const dateKey = formatDateKey(day);
+                        const count = dataMap.get(dateKey) ?? 0;
+                        const isFutureDay = dateKey > todayKey;
+
                         return (
                           <div
                             key={dayIndex}
+                            className={cn(
+                              "rounded-[3px] border border-[var(--heatmap-cell-border)] transition-opacity",
+                              isFutureDay ? "opacity-45" : "cursor-pointer hover:opacity-80"
+                            )}
                             style={{
                               width: CELL_SIZE,
                               height: CELL_SIZE,
+                              backgroundColor: isFutureDay ? "var(--heatmap-future-cell)" : getCellColor(count),
                             }}
+                            onMouseEnter={
+                              isFutureDay
+                                ? undefined
+                                : (event) => {
+                                    const rect = event.currentTarget.getBoundingClientRect();
+                                    setTooltip({
+                                      date: dateKey,
+                                      count,
+                                      x: rect.left + rect.width / 2,
+                                      y: rect.top,
+                                    });
+                                  }
+                            }
+                            onMouseLeave={isFutureDay ? undefined : () => setTooltip(null)}
                           />
                         );
-                      }
-
-                      const dateKey = formatDateKey(day);
-                      const count = dataMap.get(dateKey) ?? 0;
-                      const isFutureDay = dateKey > todayKey;
-
-                      return (
-                        <div
-                          key={dayIndex}
-                          className={cn(
-                            "rounded-[3px] border border-[var(--heatmap-cell-border)] transition-opacity",
-                            isFutureDay ? "opacity-45" : "cursor-pointer hover:opacity-80"
-                          )}
-                          style={{
-                            width: CELL_SIZE,
-                            height: CELL_SIZE,
-                            backgroundColor: isFutureDay ? "var(--heatmap-future-cell)" : getCellColor(count),
-                          }}
-                          onMouseEnter={
-                            isFutureDay
-                              ? undefined
-                              : (event) => {
-                                  const rect = event.currentTarget.getBoundingClientRect();
-                                  setTooltip({
-                                    date: dateKey,
-                                    count,
-                                    x: rect.left + rect.width / 2,
-                                    y: rect.top,
-                                  });
-                                }
-                          }
-                          onMouseLeave={isFutureDay ? undefined : () => setTooltip(null)}
-                        />
-                      );
-                    })}
-                  </div>
-                ))}
+                      })}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center justify-between gap-3 pt-1 text-[10px] text-muted-foreground">
