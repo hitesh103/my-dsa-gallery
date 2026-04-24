@@ -52,7 +52,7 @@ export function Heatmap({ years = 3 }: HeatmapProps) {
     setIsLoading(true);
     try {
       const params = new URLSearchParams({ start: toDateKey(activeRange.start), end: toDateKey(activeRange.end) });
-      const res = await fetch(`/api/heatmap?${params.toString()}`);
+      const res = await fetch(`/api/heatmap?${params.toString()}`, { cache: "no-store" });
       const json = await res.json();
       setData(json.data || []);
     } catch (e) { console.error(e); } finally { setIsLoading(false); }

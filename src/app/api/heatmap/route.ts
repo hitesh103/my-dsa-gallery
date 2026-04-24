@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 
 import { getD1 } from "@/lib/d1";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const now = new Date();
@@ -17,12 +20,12 @@ export async function GET(req: Request) {
 
     const sql = `
       SELECT 
-        DATE(created_at) as date,
+        DATE(updated_at) as date,
         COUNT(*) as count
       FROM problems
-      WHERE DATE(created_at) >= DATE(?)
-        AND DATE(created_at) <= DATE(?)
-      GROUP BY DATE(created_at)
+      WHERE DATE(updated_at) >= DATE(?)
+        AND DATE(updated_at) <= DATE(?)
+      GROUP BY DATE(updated_at)
       ORDER BY date ASC;
     `;
 
