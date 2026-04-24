@@ -6,9 +6,8 @@ import { Heatmap } from "@/components/home/Heatmap";
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 sm:gap-10 px-4 py-8 sm:py-14 pb-24 sm:pb-14">
-      <section className="grid gap-6 sm:gap-8 lg:grid-cols-[1fr_380px] lg:items-start">
-        <div className="flex flex-col gap-4">
-          <Heatmap years={3} />
+      <section className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+        <div className="min-w-0 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <p className="text-sm font-medium text-muted-foreground">
               Personal workspace
@@ -49,6 +48,8 @@ export default function Home() {
             attach study photos + leave comments under each problem for quick
             revisions.
           </div>
+
+          <Heatmap years={3} />
         </div>
 
         <TodoList />

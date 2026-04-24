@@ -1,56 +1,53 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { cn } from "@/lib/cn";
 
-type HeatmapData = {
-  date: string;
-  count: number;
+// --- Types ---
+type HeatmapData = { date: string; count: number };
+type HeatmapProps = { years?: number };
+type RangeOption = { label: string; value: string; start: Date; end: Date };
+type CalendarCell = { date: Date | null; dateKey: string | null; count: number; isInRange: boolean };
+
+// --- Constants ---
+const CELL_SIZE = 15; 
+const CELL_GAP = 4;
+const MONTH_GAP = 16; // The "LeetCode" gap
+
+// --- Utilities ---
+const toDateKey = (date: Date) => date.toISOString().split("T")[0];
+const addDays = (date: Date, days: number) => {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
 };
+const startOfWeek = (date: Date) => addDays(date, -date.getUTCDay());
+const endOfWeek = (date: Date) => addDays(date, 6 - date.getUTCDay());
 
-type HeatmapProps = {
-  years?: number;
-};
+function getRangeOptions(limit: number): RangeOption[] {
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  
+  const options: RangeOption[] = [
+    { label: "Current", value: "current", start: addDays(today, -364), end: today }
+  ];
 
-type TooltipState = {
-  date: string;
-  count: number;
-  x: number;
-  y: number;
-};
-
-type WeekColumn = {
-  days: Array<Date | null>;
-  label: string | null;
-  startColumn: number;
-  gapCountBefore: number;
-};
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const DAY_LABELS = ["", "Mon", "", "Wed", "", "Fri", ""];
-const CELL_SIZE = "clamp(9px, 1.7vw, 12px)";
-const CELL_GAP = "clamp(2px, 0.35vw, 3px)";
-const MONTH_GAP = "clamp(8px, 1.1vw, 12px)";
-const DAY_LABEL_WIDTH = 28;
-const LEGEND_LEVELS = [
-  { label: "0", color: "var(--heatmap-level-0)" },
-  { label: "1", color: "var(--heatmap-level-1)" },
-  { label: "2", color: "var(--heatmap-level-2)" },
-  { label: "3", color: "var(--heatmap-level-3)" },
-  { label: "4", color: "var(--heatmap-level-4)" },
-  { label: "5+", color: "var(--heatmap-level-5)" },
-];
-
-function formatDateKey(date: Date) {
-  const year = date.getFullYear();
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  for (let i = 0; i < limit; i++) {
+    const year = today.getUTCFullYear() - i;
+    // Check if we already added "Current" which might cover this year
+    options.push({
+      label: `${year}`,
+      value: `${year}`,
+      start: new Date(Date.UTC(year, 0, 1)),
+      end: new Date(Date.UTC(year, 11, 31)),
+    });
+  }
+  // Remove duplicates if "Current" and the first year overlap
+  return Array.from(new Map(options.map(o => [o.label, o])).values());
 }
 
-function getCellColor(count: number) {
+function getCellTone(count: number) {
   if (count <= 0) return "var(--heatmap-level-0)";
   if (count === 1) return "var(--heatmap-level-1)";
   if (count === 2) return "var(--heatmap-level-2)";
@@ -59,317 +56,152 @@ function getCellColor(count: number) {
   return "var(--heatmap-level-5)";
 }
 
-function getAvailableYears(limit: number) {
-  const currentYear = new Date().getFullYear();
-  return Array.from({ length: limit }, (_, index) => currentYear - index);
-}
-
-function getWeeksForYear(year: number): WeekColumn[] {
-  const yearStart = new Date(year, 0, 1);
-  const yearEnd = new Date(year, 11, 31);
-  const gridStart = new Date(yearStart);
-  const gridEnd = new Date(yearEnd);
-
-  gridStart.setDate(gridStart.getDate() - gridStart.getDay());
-  gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay()));
-
-  const columns: WeekColumn[] = [];
-  let current = new Date(gridStart);
-  let gapCountBefore = 0;
-
-  while (current <= gridEnd) {
-    const weekDays: Array<Date | null> = [];
-    let label: string | null = null;
-
-    for (let dayIndex = 0; dayIndex < 7; dayIndex += 1) {
-      const day = new Date(current);
-      const isInYear = day >= yearStart && day <= yearEnd;
-
-      if (isInYear && day.getDate() === 1) {
-        label = MONTHS[day.getMonth()];
-        if (columns.length > 0) {
-          gapCountBefore += 1;
-        }
-      }
-
-      weekDays.push(isInYear ? day : null);
-      current.setDate(current.getDate() + 1);
-    }
-
-    columns.push({
-      days: weekDays,
-      label,
-      startColumn: columns.length + 1,
-      gapCountBefore,
-    });
-  }
-
-  return columns;
-}
-
 export function Heatmap({ years = 3 }: HeatmapProps) {
-  const availableYears = useMemo(() => getAvailableYears(Math.max(1, Math.min(years, 5))), [years]);
-  const [selectedYear, setSelectedYear] = useState(availableYears[0]);
+  const rangeOptions = useMemo(() => getRangeOptions(years), [years]);
+  const [selectedRange, setSelectedRange] = useState(rangeOptions[0].value);
   const [data, setData] = useState<HeatmapData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
 
-  useEffect(() => {
-    setSelectedYear(availableYears[0]);
-  }, [availableYears]);
+  const activeRange = useMemo(
+    () => rangeOptions.find((o) => o.value === selectedRange) ?? rangeOptions[0],
+    [rangeOptions, selectedRange]
+  );
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-
     try {
-      const res = await fetch(`/api/heatmap?year=${selectedYear}`);
+      const params = new URLSearchParams({ 
+        start: toDateKey(activeRange.start), 
+        end: toDateKey(activeRange.end) 
+      });
+      const res = await fetch(`/api/heatmap?${params.toString()}`);
       const json = await res.json();
-
-      if (json.error) {
-        throw new Error(json.error);
-      }
-
       setData(json.data || []);
-      setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load heatmap data");
+      console.error("Heatmap fetch error:", e);
     } finally {
       setIsLoading(false);
     }
-  }, [selectedYear]);
+  }, [activeRange]);
 
-  useEffect(() => {
-    void fetchData();
-  }, [fetchData]);
+  useEffect(() => { void fetchData(); }, [fetchData]);
 
-  const todayKey = formatDateKey(new Date());
-  const dataMap = useMemo(() => new Map(data.map((entry) => [entry.date, entry.count])), [data]);
-  const weekColumns = useMemo(() => getWeeksForYear(selectedYear), [selectedYear]);
-  const totalProblems = data.reduce((sum, entry) => sum + entry.count, 0);
+  const dataMap = useMemo(() => new Map(data.map((d) => [d.date, d.count])), [data]);
+
+  // Group weeks by month for the LeetCode cluster effect
+  const monthGroups = useMemo(() => {
+    const groups: { month: string; weeks: CalendarCell[][] }[] = [];
+    let cursor = startOfWeek(activeRange.start);
+    const end = endOfWeek(activeRange.end);
+
+    while (cursor <= end) {
+      const week: CalendarCell[] = [];
+      // Use Wednesday to decide which month this week belongs to
+      const midWeek = addDays(cursor, 3);
+      const monthName = midWeek.toLocaleString("en-US", { month: "short", timeZone: "UTC" });
+
+      for (let i = 0; i < 7; i++) {
+        const inRange = cursor >= activeRange.start && cursor <= activeRange.end;
+        const key = toDateKey(cursor);
+        week.push({
+          date: inRange ? new Date(cursor) : null,
+          dateKey: inRange ? key : null,
+          count: inRange ? dataMap.get(key) ?? 0 : 0,
+          isInRange: inRange,
+        });
+        cursor = addDays(cursor, 1);
+      }
+
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && lastGroup.month === monthName) {
+        lastGroup.weeks.push(week);
+      } else {
+        groups.push({ month: monthName, weeks: [week] });
+      }
+    }
+    return groups;
+  }, [activeRange, dataMap]);
+
+  const totalSubmissions = data.reduce((sum, d) => sum + d.count, 0);
 
   return (
-    <Card>
-      <CardHeader className="gap-3 pb-3 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="flex items-center justify-between gap-3">
-          <span className="text-base font-semibold">Contributions</span>
-          {isLoading ? null : (
-            <span className="rounded-full bg-muted px-2 py-1 text-xs font-normal text-muted-foreground">
-              {totalProblems} total
+    <Card className="overflow-hidden rounded-[28px] border bg-card text-foreground">
+      <CardContent className="space-y-6 p-6 sm:p-8">
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            {totalSubmissions} <span className="text-lg font-medium text-muted-foreground sm:text-xl">
+              submissions in {activeRange.value === "current" ? "the past year" : activeRange.label}
             </span>
-          )}
-        </CardTitle>
+          </div>
 
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <span>Year</span>
           <select
-            value={selectedYear}
-            onChange={(event) => setSelectedYear(Number(event.target.value))}
-            className="h-9 rounded-lg border bg-background px-3 text-sm text-foreground outline-none transition-colors focus:border-ring"
+            value={selectedRange}
+            onChange={(e) => setSelectedRange(e.target.value)}
+            className="h-10 w-full rounded-xl border bg-muted/50 px-3 text-sm font-medium outline-none transition-colors focus:ring-2 focus:ring-ring sm:w-[120px]"
           >
-            {availableYears.map((year) => (
-              <option key={year} value={year}>
-                {year}
+            {rangeOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
               </option>
             ))}
           </select>
-        </label>
-      </CardHeader>
+        </div>
 
-      <CardContent className="space-y-4">
-        {error && (
-          <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
-            {error}
-          </div>
-        )}
-
+        {/* Heatmap Grid */}
         {isLoading ? (
-          <div className="h-32 animate-pulse rounded-md bg-muted" />
+          <div className="h-40 animate-pulse rounded-2xl bg-muted" />
         ) : (
-          <div className="w-full overflow-x-auto pb-2 [scrollbar-width:thin]">
-            <div
-              className="min-w-max"
-              style={{
-                display: "inline-flex",
-                flexDirection: "column",
-                gap: CELL_GAP,
-              }}
-            >
-              <div
-                style={{
-                  height: 18,
-                  paddingLeft: DAY_LABEL_WIDTH + 6,
-                  position: "relative",
-                }}
-              >
-                {weekColumns.map(({ label, startColumn, gapCountBefore }, index) => {
-                  if (!label) return null;
-
-                  return (
-                    <span
-                      key={`${label}-${index}`}
-                      style={{
-                        position: "absolute",
-                        left: `calc((${startColumn - 1} * (${CELL_SIZE} + ${CELL_GAP})) + ${gapCountBefore} * ${MONTH_GAP})`,
-                        fontSize: 10,
-                        lineHeight: "18px",
-                        color: "hsl(var(--muted-foreground))",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {label}
-                    </span>
-                  );
-                })}
-              </div>
-
-              <div style={{ display: "flex", alignItems: "flex-start", gap: "6px" }}>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateRows: `repeat(7, ${CELL_SIZE})`,
-                    rowGap: CELL_GAP,
-                    width: DAY_LABEL_WIDTH,
-                  }}
-                >
-                  {DAY_LABELS.map((label, index) => (
-                    <div
-                      key={index}
-                      style={{
-                        height: CELL_SIZE,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        fontSize: 9,
-                        lineHeight: CELL_SIZE,
-                        color: "hsl(var(--muted-foreground))",
-                      }}
-                    >
-                      {label}
-                    </div>
-                  ))}
-                </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridAutoFlow: "column",
-                    gridAutoColumns: CELL_SIZE,
-                    gridTemplateRows: `repeat(7, ${CELL_SIZE})`,
-                    columnGap: CELL_GAP,
-                    rowGap: CELL_GAP,
-                  }}
-                >
-                  {weekColumns.map((week, weekIndex) => (
-                    <div
-                      key={weekIndex}
-                      style={{
-                        display: "grid",
-                        gridTemplateRows: `repeat(7, ${CELL_SIZE})`,
-                        rowGap: CELL_GAP,
-                        marginLeft: week.label && weekIndex > 0 ? MONTH_GAP : "0px",
-                      }}
-                    >
-                      {week.days.map((day, dayIndex) => {
-                        if (!day) {
-                          return (
-                            <div
-                              key={dayIndex}
-                              style={{
-                                width: CELL_SIZE,
-                                height: CELL_SIZE,
-                              }}
-                            />
-                          );
-                        }
-
-                        const dateKey = formatDateKey(day);
-                        const count = dataMap.get(dateKey) ?? 0;
-                        const isFutureDay = dateKey > todayKey;
-
-                        return (
+          <div className="w-full overflow-x-auto no-scrollbar pb-2">
+            <div className="flex items-start gap-x-[16px] min-w-max">
+              {monthGroups.map((group, gIdx) => (
+                <div key={gIdx} className="flex flex-col gap-2">
+                  {/* Grid of Squares */}
+                  <div className="flex" style={{ gap: CELL_GAP }}>
+                    {group.weeks.map((week, wIdx) => (
+                      <div key={wIdx} className="flex flex-col" style={{ gap: CELL_GAP }}>
+                        {week.map((cell, dIdx) => (
                           <div
-                            key={dayIndex}
+                            key={dIdx}
                             className={cn(
-                              "rounded-[3px] border border-[var(--heatmap-cell-border)] transition-opacity",
-                              isFutureDay ? "opacity-45" : "cursor-pointer hover:opacity-80"
+                              "rounded-[3px] border border-[var(--heatmap-cell-border)] transition-all duration-300",
+                              cell.isInRange ? "opacity-100" : "opacity-0 pointer-events-none"
                             )}
                             style={{
                               width: CELL_SIZE,
                               height: CELL_SIZE,
-                              backgroundColor: isFutureDay ? "var(--heatmap-future-cell)" : getCellColor(count),
+                              backgroundColor: cell.isInRange ? getCellTone(cell.count) : "transparent",
                             }}
-                            onMouseEnter={
-                              isFutureDay
-                                ? undefined
-                                : (event) => {
-                                    const rect = event.currentTarget.getBoundingClientRect();
-                                    setTooltip({
-                                      date: dateKey,
-                                      count,
-                                      x: rect.left + rect.width / 2,
-                                      y: rect.top,
-                                    });
-                                  }
-                            }
-                            onMouseLeave={isFutureDay ? undefined : () => setTooltip(null)}
+                            title={cell.dateKey ? `${cell.count} submissions on ${cell.dateKey}` : undefined}
                           />
-                        );
-                      })}
-                    </div>
-                  ))}
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Month Label */}
+                  <span className="text-[11px] font-medium text-muted-foreground">
+                    {group.month}
+                  </span>
                 </div>
-              </div>
+              ))}
+            </div>
 
-              <div className="flex items-center justify-between gap-3 pt-1 text-[10px] text-muted-foreground">
-                <span>{selectedYear} contributions</span>
-                <div className="flex items-center gap-1.5">
-                  <span>Less</span>
-                  {LEGEND_LEVELS.map((level) => (
-                    <div
-                      key={level.label}
-                      className="rounded-[3px] border border-[var(--heatmap-cell-border)]"
-                      style={{
-                        width: CELL_SIZE,
-                        height: CELL_SIZE,
-                        backgroundColor: level.color,
-                      }}
-                    />
-                  ))}
-                  <span>More</span>
-                </div>
-              </div>
+            {/* Legend */}
+            <div className="mt-6 flex items-center justify-end gap-2 text-[11px] text-muted-foreground">
+              <span>Less</span>
+              {[0, 1, 2, 3, 4, 5].map((lvl) => (
+                <div
+                  key={lvl}
+                  className="rounded-[2px] border border-[var(--heatmap-cell-border)]"
+                  style={{ width: 12, height: 12, backgroundColor: getCellTone(lvl) }}
+                />
+              ))}
+              <span>More</span>
             </div>
           </div>
         )}
       </CardContent>
-
-      {tooltip && (
-        <div
-          style={{
-            position: "fixed",
-            zIndex: 50,
-            left: tooltip.x,
-            top: tooltip.y - 6,
-            transform: "translate(-50%, -100%)",
-            padding: "4px 8px",
-            borderRadius: 6,
-            background: "hsl(var(--foreground))",
-            color: "hsl(var(--background))",
-            boxShadow: "0 6px 20px rgba(0, 0, 0, 0.22)",
-            pointerEvents: "none",
-            whiteSpace: "nowrap",
-            fontSize: 11,
-          }}
-        >
-          <span style={{ fontWeight: 600 }}>{tooltip.count}</span> problem{tooltip.count !== 1 ? "s" : ""} on{" "}
-          {new Date(`${tooltip.date}T00:00:00`).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </div>
-      )}
     </Card>
   );
 }

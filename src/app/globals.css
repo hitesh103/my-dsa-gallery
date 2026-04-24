@@ -16,13 +16,12 @@
   --ring: 240 5.2% 33.9%;
   --radius: 0.75rem;
   --heatmap-cell-border: rgba(27, 31, 35, 0.06);
-  --heatmap-future-cell: #f7f7f8;
   --heatmap-level-0: #ebedf0;
-  --heatmap-level-1: #c8e6c0;
-  --heatmap-level-2: #4cae4f;
-  --heatmap-level-3: #d6c2f1;
-  --heatmap-level-4: #a171d6;
-  --heatmap-level-5: #6f3aa8;
+  --heatmap-level-1: #9be9a8;
+  --heatmap-level-2: #40c463;
+  --heatmap-level-3: #c8b6ff;
+  --heatmap-level-4: #9d7bff;
+  --heatmap-level-5: #7b61ff;
 }
 
 :root.dark {
@@ -35,13 +34,12 @@
   --border: 240 3.7% 15.9%;
   --ring: 240 4.9% 83.9%;
   --heatmap-cell-border: rgba(255, 255, 255, 0.06);
-  --heatmap-future-cell: #23252b;
-  --heatmap-level-0: #2a2d33;
-  --heatmap-level-1: #1e4728;
-  --heatmap-level-2: #2e7d3e;
-  --heatmap-level-3: #55307f;
-  --heatmap-level-4: #7d4cb3;
-  --heatmap-level-5: #b183eb;
+  --heatmap-level-0: #161b22;
+  --heatmap-level-1: #0e4429;
+  --heatmap-level-2: #26a641;
+  --heatmap-level-3: #5f4bb6;
+  --heatmap-level-4: #7c5cff;
+  --heatmap-level-5: #a78bfa;
 }
 
 @theme inline {

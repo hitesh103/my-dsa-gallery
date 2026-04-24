@@ -9,6 +9,8 @@ export async function GET(req: Request) {
   const requestedYear = Number(searchParams.get("year") ?? `${currentYear}`);
   const year = Number.isFinite(requestedYear) ? requestedYear : currentYear;
   const cappedYear = Math.max(currentYear - 4, Math.min(year, currentYear));
+  const requestedStart = searchParams.get("start");
+  const requestedEnd = searchParams.get("end");
 
   try {
     const db = getD1();
@@ -24,8 +26,8 @@ export async function GET(req: Request) {
       ORDER BY date ASC;
     `;
 
-    const startDate = `${cappedYear}-01-01`;
-    const endDate = `${cappedYear}-12-31`;
+    const startDate = requestedStart ?? `${cappedYear}-01-01`;
+    const endDate = requestedEnd ?? `${cappedYear}-12-31`;
 
     const result = await db
       .prepare(sql)
