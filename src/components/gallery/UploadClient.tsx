@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -16,8 +16,28 @@ export function UploadClient({
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<"idle" | "uploading" | "done" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   const disabled = useMemo(() => status === "uploading" || !file, [status, file]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile && droppedFile.type.startsWith("image/")) {
+      setFile(droppedFile);
+    }
+  }, []);
 
   const onUpload = async () => {
     if (!file) return;
@@ -50,14 +70,25 @@ export function UploadClient({
   };
 
   return (
-    <div className={cn("flex flex-col gap-2 rounded-xl border bg-card p-4 text-card-foreground", className)}>
+    <div
+      className={cn(
+        "flex flex-col gap-2 rounded-xl border bg-card p-4 text-card-foreground",
+        isDragging && "border-blue-500 bg-blue-50 dark:bg-blue-950/20",
+        className,
+      )}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <div className="flex flex-wrap items-center gap-3">
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          className="text-sm"
-        />
+        <div className="text-sm">
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            className="text-sm"
+          />
+        </div>
         <button
           type="button"
           disabled={disabled}
@@ -71,10 +102,19 @@ export function UploadClient({
           {status === "uploading" ? "Uploading…" : "Upload"}
         </button>
         <div className="text-xs text-muted-foreground">
-          {status === "done" ? "Uploaded" : "Uploads use presigned R2 URLs."}
+          {status === "done" ? "Uploaded" : "Drag & drop or click to select"}
         </div>
       </div>
+      {file && (
+        <div className="mt-2 flex items-center gap-2 text-xs">
+          <span className="text-blue-600 dark:text-blue-400">Selected:</span>
+          <span className="font-medium">{file.name}</span>
+        </div>
+      )}
       {error ? <div className="text-xs text-red-600 dark:text-red-400">{error}</div> : null}
+      <div className="mt-2 text-xs text-muted-foreground">
+        Drop an image anywhere in this box to upload.
+      </div>
     </div>
   );
 }
