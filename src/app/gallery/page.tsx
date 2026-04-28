@@ -1,3 +1,6 @@
+import { cookies } from "next/headers";
+
+import { isAdminRequest, getSessionTokenFromCookieHeader } from "@/lib/adminSession";
 import { listImages } from "@/lib/images";
 
 import { UploadClient } from "./UploadClient";
@@ -6,12 +9,19 @@ import { ImageFigureClient } from "@/components/gallery/ImageFigureClient";
 export const dynamic = "force-dynamic";
 
 export default async function GalleryPage() {
+  const cookieStore = await cookies();
+  const cookieHeader = cookieStore.toString();
+  const isAdmin = await isAdminRequest(new Request("http://localhost", { headers: { cookie: cookieHeader } }));
+
   let images: Awaited<ReturnType<typeof listImages>> = [];
   let r2Error: string | null = null;
-  try {
-    images = await listImages({ prefix: "gallery/" });
-  } catch (e) {
-    r2Error = e instanceof Error ? e.message : "R2 is not configured.";
+  
+  if (isAdmin) {
+    try {
+      images = await listImages({ prefix: "gallery/" });
+    } catch (e) {
+      r2Error = e instanceof Error ? e.message : "R2 is not configured.";
+    }
   }
 
   return (
@@ -23,9 +33,18 @@ export default async function GalleryPage() {
         </p>
       </div>
 
-      <div className="mt-6">
-        <UploadClient />
-      </div>
+      {isAdmin ? (
+        <div className="mt-6">
+          <UploadClient />
+        </div>
+      ) : (
+        <div className="mt-6 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
+          <a href="/admin" className="text-blue-600 hover:underline">
+            Log in as admin
+          </a>{" "}
+          to upload photos.
+        </div>
+      )}
 
       {r2Error ? (
         <div className="mt-4 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
@@ -35,27 +54,27 @@ export default async function GalleryPage() {
             <code>.env.local</code>) to enable listing images.
           </div>
         </div>
-      ) : images.length === 0 ? (
+      ) : images.length === 0 && isAdmin ? (
         <div className="mt-4 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
           No photos uploaded till now.
         </div>
+      ) : images.length > 0 ? (
+        <div className="mt-8 columns-1 gap-4 sm:columns-2 lg:columns-3">
+          {images.map((img) => (
+            <div
+              key={img.key}
+              className="mb-4 break-inside-avoid"
+            >
+              <ImageFigureClient
+                url={img.url}
+                alt={img.key}
+                caption={img.key.replace(/^gallery\//, "")}
+                imageKey={img.key}
+              />
+            </div>
+          ))}
+        </div>
       ) : null}
-
-      <div className="mt-8 columns-1 gap-4 sm:columns-2 lg:columns-3">
-        {images.map((img) => (
-          <div
-            key={img.key}
-            className="mb-4 break-inside-avoid"
-          >
-            <ImageFigureClient
-              url={img.url}
-              alt={img.key}
-              caption={img.key.replace(/^gallery\//, "")}
-              imageKey={img.key}
-            />
-          </div>
-        ))}
-      </div>
     </main>
   );
 }
