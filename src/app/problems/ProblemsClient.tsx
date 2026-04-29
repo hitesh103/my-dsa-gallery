@@ -47,6 +47,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
   const [q, setQ] = useState("");
   const [topic, setTopic] = useState<string>("all");
   const [pattern, setPattern] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<"title" | "id-asc" | "id-desc">("id-desc");
   const [view, setView] = useState<"grouped" | "board" | "list">("grouped");
   const [showIncomplete, setShowIncomplete] = useState(false);
   const [remote, setRemote] = useState<ProblemWithComplete[] | null>(null);
@@ -145,14 +146,25 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
       map.set(problem.topic, list);
     }
     for (const list of map.values()) {
-      list.sort((a, b) => a.title.localeCompare(b.title));
+      if (sortBy === "id-asc") {
+        list.sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
+      } else if (sortBy === "id-desc") {
+        list.sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+      } else {
+        list.sort((a, b) => a.title.localeCompare(b.title));
+      }
     }
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [filtered]);
+  }, [filtered, sortBy]);
 
   const ordered = useMemo(() => {
+    if (sortBy === "id-asc") {
+      return [...filtered].sort((a, b) => (a.id ?? 0) - (b.id ?? 0));
+    } else if (sortBy === "id-desc") {
+      return [...filtered].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+    }
     return [...filtered].sort((a, b) => a.title.localeCompare(b.title));
-  }, [filtered]);
+  }, [filtered, sortBy]);
 
   const stats = useMemo(() => {
     const strongCoverage = filtered.filter((problem) => (problem.completenessScore ?? 0) >= 80).length;
@@ -165,6 +177,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
     setQ("");
     setTopic("all");
     setPattern("all");
+    setSortBy("id-desc");
   };
 
   const onRandomProblem = () => {
@@ -269,6 +282,18 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                   className="h-4 w-4 rounded border"
                 />
                 <span className="text-muted-foreground">Show incomplete metadata</span>
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-muted-foreground">Sort</span>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as "title" | "id-asc" | "id-desc")}
+                  className="min-h-[44px] h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                >
+                  <option value="id-desc">ID (Newest First)</option>
+                  <option value="id-asc">ID (Oldest First)</option>
+                  <option value="title">Title (A-Z)</option>
+                </select>
               </label>
             </div>
             <div className="text-sm text-muted-foreground">
