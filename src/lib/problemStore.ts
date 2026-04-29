@@ -188,7 +188,7 @@ export async function listProblems({
       JOIN problems_fts f ON f.slug = p.slug
       WHERE problems_fts MATCH ?
       ${where.length ? `AND ${where.join(" AND ")}` : ""}
-      ORDER BY p.updated_at DESC
+      ORDER BY p.created_at DESC
       LIMIT ?;
     `;
     const out = await db
@@ -214,7 +214,7 @@ export async function listProblems({
       p.updated_at
     FROM problems p
     ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-    ORDER BY p.updated_at DESC
+    ORDER BY p.created_at DESC
     LIMIT ?;
   `;
   const out = await db.prepare(sql).bind(...binds, capped).all<ProblemRow>();
@@ -281,7 +281,7 @@ export async function listAdminProblems({
       JOIN problems_fts f ON f.slug = p.slug
       WHERE problems_fts MATCH ?
       ${where.length ? `AND ${where.join(" AND ")}` : ""}
-      ORDER BY p.updated_at DESC
+      ORDER BY p.created_at DESC
       LIMIT ?;
     `;
 
@@ -304,7 +304,7 @@ export async function listAdminProblems({
       p.updated_at
     FROM problems p
     ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-    ORDER BY p.updated_at DESC
+    ORDER BY p.created_at DESC
     LIMIT ?;
   `;
   const out = await db.prepare(sql).bind(...binds, capped).all<ProblemRow>();
