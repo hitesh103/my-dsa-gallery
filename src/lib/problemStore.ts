@@ -10,6 +10,7 @@ type ProblemRow = {
   content_json: string;
   created_at: string;
   updated_at: string;
+  id: number;
 };
 
 export type AdminProblemSummary = ProblemMeta & {
@@ -75,6 +76,7 @@ function rowToProblem(row: ProblemRow): ProblemDoc {
     content,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    id: row.id,
   };
 }
 
@@ -127,6 +129,7 @@ export function toAdminProblemSummary(problem: ProblemDoc): AdminProblemSummary 
     completenessScore,
     isRevisionReady: missingParts.length === 0,
     missingParts,
+    id: problem.id,
   };
 }
 
@@ -141,6 +144,7 @@ function toProblemMeta(problem: ProblemDoc): ProblemMeta {
     updatedAt: problem.updatedAt,
     isRevisionReady: completenessScore >= PUBLIC_PROBLEM_MIN_COMPLETENESS,
     completenessScore,
+    id: problem.id,
   };
 }
 
@@ -183,12 +187,13 @@ export async function listProblems({
         p.link,
         p.content_json,
         p.created_at,
-        p.updated_at
+        p.updated_at,
+        p.id
       FROM problems p
       JOIN problems_fts f ON f.slug = p.slug
       WHERE problems_fts MATCH ?
       ${where.length ? `AND ${where.join(" AND ")}` : ""}
-      ORDER BY p.created_at DESC
+      ORDER BY p.updated_at DESC
       LIMIT ?;
     `;
     const out = await db
@@ -211,10 +216,11 @@ export async function listProblems({
       p.link,
       p.content_json,
       p.created_at,
-      p.updated_at
+      p.updated_at,
+      p.id
     FROM problems p
     ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-    ORDER BY p.created_at DESC
+    ORDER BY p.updated_at DESC
     LIMIT ?;
   `;
   const out = await db.prepare(sql).bind(...binds, capped).all<ProblemRow>();
@@ -228,7 +234,7 @@ export async function getProblem(slug: string): Promise<ProblemDoc | null> {
   const db = getD1();
   const row = await db
     .prepare(
-      "SELECT slug, title, topic, pattern, link, content_json, created_at, updated_at FROM problems WHERE slug = ?",
+      "SELECT slug, title, topic, pattern, link, content_json, created_at, updated_at, id FROM problems WHERE slug = ?",
     )
     .bind(slug)
     .first<ProblemRow>();
@@ -276,12 +282,13 @@ export async function listAdminProblems({
         p.link,
         p.content_json,
         p.created_at,
-        p.updated_at
+        p.updated_at,
+        p.id
       FROM problems p
       JOIN problems_fts f ON f.slug = p.slug
       WHERE problems_fts MATCH ?
       ${where.length ? `AND ${where.join(" AND ")}` : ""}
-      ORDER BY p.created_at DESC
+      ORDER BY p.updated_at DESC
       LIMIT ?;
     `;
 
@@ -301,10 +308,11 @@ export async function listAdminProblems({
       p.link,
       p.content_json,
       p.created_at,
-      p.updated_at
+      p.updated_at,
+      p.id
     FROM problems p
     ${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-    ORDER BY p.created_at DESC
+    ORDER BY p.updated_at DESC
     LIMIT ?;
   `;
   const out = await db.prepare(sql).bind(...binds, capped).all<ProblemRow>();

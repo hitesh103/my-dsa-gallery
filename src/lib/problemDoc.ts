@@ -213,10 +213,12 @@ export type ProblemDoc = {
   content: ProblemContent;
   createdAt?: string;
   updatedAt?: string;
+  id?: number;
 };
 
-export type ProblemMeta = Pick<ProblemDoc, "slug" | "title" | "topic" | "pattern" | "link"> & {
+export type ProblemMeta = Pick<ProblemDoc, "slug" | "title" | "topic" | "pattern" | "link" | "id"> & {
   updatedAt?: string;
   isRevisionReady?: boolean;
   completenessScore?: number;
+  problemNumber?: number;
 };

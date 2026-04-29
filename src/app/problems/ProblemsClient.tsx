@@ -372,7 +372,8 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                     >
                       <div className="flex flex-col gap-3">
                         <div className="flex items-start justify-between gap-3">
-                          <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-muted-foreground">#{problem.id}</span>
                             <NextLink
                               href={`/problems/${problem.slug}`}
                               className="text-base font-semibold text-slate-900 underline-offset-4 hover:underline dark:text-slate-50"
@@ -409,7 +410,10 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
             >
               <CardHeader className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
-                  <Badge tone={toneForTopic(problem.topic)}>{problem.topic}</Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge tone={toneForTopic(problem.topic)}>{problem.topic}</Badge>
+                    <span className="text-xs font-medium text-muted-foreground">#{problem.id}</span>
+                  </div>
                   <Badge tone={readinessTone(problem.completenessScore)}>
                     {problem.completenessScore ?? 0}% ready
                   </Badge>
@@ -451,18 +455,21 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
               {ordered.map((problem) => (
                 <li key={problem.slug} className="py-4 first:pt-0 last:pb-0">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="space-y-2">
-                      <NextLink
-                        href={`/problems/${problem.slug}`}
-                        className="text-base font-semibold text-slate-900 hover:underline dark:text-slate-50"
-                      >
-                        {problem.title}
-                      </NextLink>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge tone={toneForTopic(problem.topic)}>{problem.topic}</Badge>
-                        <Badge tone={toneForPattern(problem.pattern)}>{problem.pattern}</Badge>
+                    <div className="flex items-start gap-3">
+                      <span className="mt-1 text-xs font-medium text-muted-foreground">#{problem.id}</span>
+                      <div className="space-y-2">
+                        <NextLink
+                          href={`/problems/${problem.slug}`}
+                          className="text-base font-semibold text-slate-900 hover:underline dark:text-slate-50"
+                        >
+                          {problem.title}
+                        </NextLink>
+                        <div className="flex flex-wrap gap-2">
+                          <Badge tone={toneForTopic(problem.topic)}>{problem.topic}</Badge>
+                          <Badge tone={toneForPattern(problem.pattern)}>{problem.pattern}</Badge>
+                        </div>
+                        <div className="text-xs text-muted-foreground">{problem.slug}</div>
                       </div>
-                      <div className="text-xs text-muted-foreground">{problem.slug}</div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge tone={readinessTone(problem.completenessScore)}>
