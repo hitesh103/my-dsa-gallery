@@ -83,3 +83,53 @@ export function CodeBlock({ className, children, tabIndex, ...props }: PreProps)
     </div>
   );
 }
+
+export function CodeSnippet({
+  code,
+  language = "language-java",
+}: {
+  code: string;
+  language?: string;
+}) {
+  const codeRef = useRef<HTMLElement | null>(null);
+  const [copied, setCopied] = useState(false);
+  const codeText = (code ?? "").trimEnd();
+
+  useEffect(() => {
+    if (!codeRef.current) return;
+    Prism.highlightElement(codeRef.current);
+  }, [codeText, language]);
+
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(codeText);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1000);
+    } catch {
+      // no-op
+    }
+  };
+
+  return (
+    <div className="group relative my-6">
+      <button
+        type="button"
+        onClick={onCopy}
+        className={cn(
+          "absolute right-3 top-3 z-10 rounded-md border border-zinc-200 bg-white/80 px-2 py-1 text-xs font-medium text-zinc-700 backdrop-blur",
+          "opacity-0 transition-opacity group-hover:opacity-100",
+          "dark:border-zinc-800 dark:bg-zinc-950/70 dark:text-zinc-200",
+        )}
+        aria-label="Copy code"
+      >
+        {copied ? "Copied" : "Copy"}
+      </button>
+
+      <pre tabIndex={0} className={cn("not-prose", language)}>
+        <code ref={codeRef} className={language}>
+          {codeText}
+        </code>
+      </pre>
+    </div>
+  );
+}

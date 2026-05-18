@@ -1,16 +1,12 @@
 import { AsciiRenderer, AsciiStepper } from "@/components/dsa/AsciiRenderer";
 import { ComplexityBadge } from "@/components/dsa/ComplexityBadge";
 import { ExecutionRenderer } from "@/components/dsa/ExecutionRenderer";
+import { CodeSnippet } from "@/components/dsa/CodeBlock";
 import { FlowDiagram } from "@/components/dsa/FlowDiagram";
 import { Markdown } from "@/components/dsa/Markdown";
 import { MermaidRenderer, MermaidStepper } from "@/components/dsa/MermaidRenderer";
 import { QuickRevision } from "@/components/dsa/QuickRevision";
 import type { ProblemDoc, Visualization } from "@/lib/problemDoc";
-
-function javaFence(code: string) {
-  const trimmed = (code ?? "").trimEnd();
-  return `\`\`\`java\n${trimmed}\n\`\`\``;
-}
 
 function isMermaidWithSteps(viz: Visualization): viz is { engine: "mermaid"; steps: { label?: string; description?: string; code: string }[] } {
   return viz.engine === "mermaid" && "steps" in viz && Array.isArray((viz as { steps: unknown }).steps);
@@ -168,7 +164,7 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
           {c.brute.codeJava ? (
             <>
               <h3>Code (Java)</h3>
-              <Markdown>{javaFence(c.brute.codeJava)}</Markdown>
+              <CodeSnippet code={c.brute.codeJava} />
             </>
           ) : null}
           {c.brute.time || c.brute.space ? (
@@ -197,7 +193,7 @@ export function ProblemDocView({ problem }: { problem: ProblemDoc }) {
           {c.optimal.codeJava ? (
             <>
               <h3>Code (Java)</h3>
-              <Markdown>{javaFence(c.optimal.codeJava)}</Markdown>
+              <CodeSnippet code={c.optimal.codeJava} />
             </>
           ) : null}
           {c.optimal.time || c.optimal.space ? (
