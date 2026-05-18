@@ -29,7 +29,8 @@
     "react-markdown": "^10.1.0",
     "reactflow": "^11.11.4",
     "remark-gfm": "^4.0.1",
-    "tailwind-merge": "^3.5.0"
+    "tailwind-merge": "^3.5.0",
+    "zod": "3.25.28"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1.18.0",

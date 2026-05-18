@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { errorStatus, requireAdmin } from "@/lib/adminAuth";
 import type { ProblemDoc } from "@/lib/problemDoc";
+import { ProblemDocSchema } from "@/lib/problemSchema";
 import { deleteProblem, getProblem, upsertProblem } from "@/lib/problemStore";
 
 export async function GET(
@@ -27,15 +28,19 @@ export async function PUT(
   try {
     await requireAdmin(req);
 
-    const body = (await req.json()) as Partial<ProblemDoc>;
-    if (!body.slug || body.slug !== slug) {
-      return NextResponse.json({ error: "Invalid slug" }, { status: 400 });
-    }
-    if (!body.title || !body.topic || !body.pattern || !body.link || !body.content) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const raw = await req.json();
+    const result = ProblemDocSchema.safeParse(raw);
+    if (!result.success) {
+      const message = result.error.errors.map((e) => `${e.path.join(".")}: ${e.message}`).join("; ");
+      return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    await upsertProblem(body as ProblemDoc);
+    const body = result.data as ProblemDoc;
+    if (body.slug !== slug) {
+      return NextResponse.json({ error: "slug in body must match URL" }, { status: 400 });
+    }
+
+    await upsertProblem(body);
     return NextResponse.json({ ok: true });
   } catch (err) {
     const status = errorStatus(err);
