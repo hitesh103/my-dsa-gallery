@@ -28,9 +28,13 @@ export default async function ProblemsIndexPage() {
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">DSA Problems</h1>
+        <p className="text-sm font-medium text-muted-foreground">Problem library</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+          DSA Problems
+        </h1>
         <p className="max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">
-          Browse the public problem library with cleaner cards, stronger filtering, and only entries that have crossed the minimum data-quality threshold.
+          Browse the public catalog, filter by topic or pattern, or hit random for a fresh revision
+          problem each time.
         </p>
       </div>
 

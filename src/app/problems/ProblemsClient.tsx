@@ -1,9 +1,9 @@
 "use client";
 
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import { RandomProblemButton } from "@/components/problems/RandomProblemButton";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { ProblemMeta } from "@/lib/problemDoc";
@@ -43,7 +43,6 @@ function readinessTone(score?: number) {
 }
 
 export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
-  const router = useRouter();
   const [q, setQ] = useState("");
   const [topic, setTopic] = useState<string>("all");
   const [pattern, setPattern] = useState<string>("all");
@@ -180,13 +179,6 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
     setSortBy("id-desc");
   };
 
-  const onRandomProblem = () => {
-    if (filtered.length === 0) return;
-    const selected = filtered[Math.floor(Math.random() * filtered.length)];
-    if (!selected) return;
-    router.push(`/problems/${selected.slug}`);
-  };
-
   return (
     <div className="mt-8 space-y-6">
       <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_28%),linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(241,245,249,0.95))] p-5 shadow-sm dark:border-slate-800 dark:bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.22),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,0.94),_rgba(2,6,23,0.98))] sm:p-7">
@@ -201,6 +193,11 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                 Entries with less than half of the important fields filled stay in admin only. This page now shows the cleaner, study-ready catalog.
               </p>
             </div>
+            <RandomProblemButton
+              problems={filtered}
+              label="Random problem"
+              className="mt-1 w-fit text-sm"
+            />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
@@ -237,14 +234,11 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                 Search by title, topic, or pattern and jump directly into a random ready problem when you want quick revision.
               </div>
             </div>
-            <button
-              type="button"
-              onClick={onRandomProblem}
-              disabled={filtered.length === 0}
-              className="rounded-full border border-slate-300 bg-slate-950 px-4 py-2 text-xs font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-200 disabled:text-slate-500 dark:border-slate-700 dark:bg-slate-100 dark:text-slate-950 dark:hover:bg-white"
-            >
-              Random Revise
-            </button>
+            <RandomProblemButton
+              problems={filtered}
+              label="Another random"
+              className="shrink-0"
+            />
           </CardTitle>
         </CardHeader>
         <CardContent>
