@@ -103,7 +103,7 @@ function MobileHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur md:hidden">
+    <header className="sticky top-0 z-30 bg-background/80 backdrop-blur md:hidden">
       <div className="flex h-14 items-center justify-between px-4">
         <NextLink
           href="/"
@@ -122,7 +122,7 @@ function DesktopHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-20 border-b bg-background/80 backdrop-blur hidden md:block">
+    <header className="sticky top-0 z-20 bg-background/80 backdrop-blur hidden md:block">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3">
         <NextLink
           href="/"
