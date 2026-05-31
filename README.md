@@ -40,12 +40,16 @@ Then open `/admin`, save the token in your browser, and click “Seed initial pr
 
 ## Cloudflare (OpenNext)
 
+`npm run build` runs the OpenNext Cloudflare adapter (outputs `.open-next/` for Wrangler). Use `npm run build:next` for a plain Next.js build only.
+
 Build and preview a production worker locally:
 
 ```bash
-npm run cf:build
+npm run build
 npm run cf:dev
 ```
+
+Cloudflare Workers CI should use **build:** `npm run build` and **deploy:** `npx wrangler deploy` (or `npm run cf:deploy` for build + deploy in one step).
 
 `wrangler.toml` is configured with:
 

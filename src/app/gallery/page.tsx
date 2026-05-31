@@ -26,7 +26,7 @@ export default async function GalleryPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
-      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.14),_transparent_28%),linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(241,245,249,0.95))] p-5 shadow-sm dark:border-slate-800 dark:bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,0.94),_rgba(2,6,23,0.98))] sm:p-7">
+      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-card p-5 shadow-sm dark:border-slate-800 sm:p-7">
         <p className="text-sm font-medium text-muted-foreground">Study visuals</p>
         <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
           Gallery
@@ -42,7 +42,7 @@ export default async function GalleryPage() {
         </div>
       ) : (
         <div className="mt-6 rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-          <a href="/admin" className="text-blue-600 hover:underline">
+          <a href="/admin" className="font-medium text-foreground underline-offset-4 hover:underline">
             Log in as admin
           </a>{" "}
           to upload photos.

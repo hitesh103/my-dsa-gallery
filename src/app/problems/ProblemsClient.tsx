@@ -3,11 +3,13 @@
 import NextLink from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
-import { RandomProblemButton } from "@/components/problems/RandomProblemButton";
+import { RandomProblemCard } from "@/components/problems/RandomProblemCard";
 import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import type { ProblemMeta } from "@/lib/problemDoc";
+import { panelHeroClass, panelHeroInnerClass } from "@/lib/panelStyles";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
+import { cn } from "@/lib/cn";
 
 type ProblemWithComplete = ProblemMeta & {
   isComplete?: boolean;
@@ -39,7 +41,7 @@ function formatUpdatedAt(value?: string) {
 
 function readinessTone(score?: number) {
   if ((score ?? 0) >= 80) return "emerald" as const;
-  return "blue" as const;
+  return "slate" as const;
 }
 
 export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
@@ -181,39 +183,34 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
 
   return (
     <div className="mt-8 space-y-6">
-      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.18),_transparent_28%),linear-gradient(135deg,_rgba(255,255,255,0.98),_rgba(241,245,249,0.95))] p-5 shadow-sm dark:border-slate-800 dark:bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.22),_transparent_28%),linear-gradient(135deg,_rgba(15,23,42,0.94),_rgba(2,6,23,0.98))] sm:p-7">
+      <section className={cn(panelHeroClass, panelHeroInnerClass)}>
         <div className="grid gap-6 lg:grid-cols-[1.5fr_1fr]">
           <div className="space-y-4">
-            <Badge tone="blue">Curated public problem set</Badge>
+            <Badge tone="slate">Curated public problem set</Badge>
             <div className="space-y-2">
-              <h2 className="max-w-2xl text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+              <h2 className="max-w-2xl text-2xl font-semibold tracking-tight text-foreground sm:text-4xl">
                 Practice from problems that are ready enough to actually learn from.
               </h2>
-              <p className="max-w-2xl text-sm leading-6 text-slate-700 dark:text-slate-300 sm:text-base">
+              <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
                 Entries with less than half of the important fields filled stay in admin only. This page now shows the cleaner, study-ready catalog.
               </p>
             </div>
-            <RandomProblemButton
-              problems={filtered}
-              label="Random problem"
-              className="mt-1 w-fit text-sm"
-            />
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <Card className="border-white/50 bg-white/80 shadow-lg shadow-slate-200/40 backdrop-blur dark:border-white/10 dark:bg-slate-950/40 dark:shadow-none">
+            <Card className="border-slate-200/80 bg-muted/40 shadow-sm dark:border-slate-800">
               <CardContent className="p-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Visible Problems</div>
                 <div className="mt-2 text-3xl font-semibold">{filtered.length}</div>
               </CardContent>
             </Card>
-            <Card className="border-white/50 bg-white/80 shadow-lg shadow-slate-200/40 backdrop-blur dark:border-white/10 dark:bg-slate-950/40 dark:shadow-none">
+            <Card className="border-slate-200/80 bg-muted/40 shadow-sm dark:border-slate-800">
               <CardContent className="p-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Strong Coverage</div>
                 <div className="mt-2 text-3xl font-semibold">{stats.strongCoverage}</div>
               </CardContent>
             </Card>
-            <Card className="border-white/50 bg-white/80 shadow-lg shadow-slate-200/40 backdrop-blur dark:border-white/10 dark:bg-slate-950/40 dark:shadow-none">
+            <Card className="border-slate-200/80 bg-muted/40 shadow-sm dark:border-slate-800">
               <CardContent className="p-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Topics / Patterns</div>
                 <div className="mt-2 text-3xl font-semibold">
@@ -225,20 +222,17 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
         </div>
       </section>
 
+      {filtered.length > 0 ? (
+        <RandomProblemCard problems={filtered} title="Random problem" />
+      ) : null}
+
       <Card className="rounded-[28px] border-slate-200/80 shadow-sm dark:border-slate-800">
         <CardHeader>
-          <CardTitle className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="text-lg">Find a problem fast</div>
-              <div className="mt-1 text-sm font-normal text-muted-foreground">
-                Search by title, topic, or pattern and jump directly into a random ready problem when you want quick revision.
-              </div>
+          <CardTitle>
+            <div className="text-lg">Find a problem fast</div>
+            <div className="mt-1 text-sm font-normal text-muted-foreground">
+              Search by title, topic, or pattern. Use the random card above to open a problem with one tap.
             </div>
-            <RandomProblemButton
-              problems={filtered}
-              label="Another random"
-              className="shrink-0"
-            />
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -440,7 +434,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                 <CardTitle className="text-lg leading-7">
                   <NextLink
                     href={`/problems/${problem.slug}`}
-                    className="text-slate-950 transition group-hover:text-sky-700 dark:text-slate-50 dark:group-hover:text-sky-300"
+                    className="text-foreground transition group-hover:underline"
                   >
                     {problem.title}
                   </NextLink>
