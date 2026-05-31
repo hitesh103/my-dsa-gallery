@@ -47,8 +47,7 @@ export function ImageDeleteButton({
       disabled={busy}
       className={cn(
         "inline-flex items-center justify-center rounded-md border px-2 py-1 text-[11px] font-medium",
-        "border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50 disabled:opacity-50",
-        "dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:bg-zinc-900",
+        "border-border bg-card text-muted-foreground hover:bg-muted disabled:opacity-50",
         className,
       )}
     >

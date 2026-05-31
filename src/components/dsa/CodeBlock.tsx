@@ -55,9 +55,8 @@ export function CodeBlock({ className, children, tabIndex, ...props }: PreProps)
         type="button"
         onClick={onCopy}
         className={cn(
-          "absolute right-3 top-3 z-10 rounded-md border border-zinc-200 bg-white/80 px-2 py-1 text-xs font-medium text-zinc-700 backdrop-blur",
+          "absolute right-3 top-3 z-10 rounded-md border border-border bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground backdrop-blur",
           "opacity-0 transition-opacity group-hover:opacity-100",
-          "dark:border-zinc-800 dark:bg-zinc-950/70 dark:text-zinc-200",
         )}
         aria-label="Copy code"
       >
@@ -116,9 +115,8 @@ export function CodeSnippet({
         type="button"
         onClick={onCopy}
         className={cn(
-          "absolute right-3 top-3 z-10 rounded-md border border-zinc-200 bg-white/80 px-2 py-1 text-xs font-medium text-zinc-700 backdrop-blur",
+          "absolute right-3 top-3 z-10 rounded-md border border-border bg-background/80 px-2 py-1 text-xs font-medium text-muted-foreground backdrop-blur",
           "opacity-0 transition-opacity group-hover:opacity-100",
-          "dark:border-zinc-800 dark:bg-zinc-950/70 dark:text-zinc-200",
         )}
         aria-label="Copy code"
       >

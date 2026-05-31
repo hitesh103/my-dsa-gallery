@@ -38,11 +38,11 @@ export function ExecutionRenderer({
   }, [steps.length]);
 
   const isDark = colorMode === "dark";
-  const border = isDark ? "rgba(255,255,255,0.10)" : "rgba(24,24,27,0.10)";
-  const textPrimary = isDark ? "#e4e4e7" : "#18181b";
-  const textSecondary = isDark ? "#a1a1aa" : "#71717a";
-  const bgCard = isDark ? "#18181b" : "#ffffff";
-  const bgAccent = isDark ? "#27272a" : "#f4f4f5";
+  const border = isDark ? "hsla(210, 5%, 20%, 1)" : "hsla(0, 0%, 80%, 1)";
+  const textPrimary = isDark ? "#fff" : "#000";
+  const textSecondary = isDark ? "hsl(0, 0%, 60%)" : "hsl(0, 0%, 40%)";
+  const bgCard = isDark ? "hsl(210, 9%, 14%)" : "hsl(0, 0%, 100%)";
+  const bgAccent = isDark ? "hsl(210, 5%, 18%)" : "hsl(0, 0%, 86%)";
 
   return (
     <div
@@ -88,14 +88,12 @@ export function ExecutionRenderer({
                   <span
                     className={cn("block h-2 w-2 rounded-full", idx === activeStepIndex ? "" : "opacity-40")}
                     style={{
-                      backgroundColor:
-                        idx === activeStepIndex
-                          ? isDark
-                            ? "#3b82f6"
-                            : "#2563eb"
-                          : isDark
-                            ? "#71717a"
-                            : "#a1a1aa",
+                    backgroundColor:
+                      idx === activeStepIndex
+                        ? "hsl(210, 100%, 56%)"
+                        : isDark
+                          ? "hsl(0, 0%, 60%)"
+                          : "hsl(0, 0%, 40%)",
                     }}
                   />
                 </button>

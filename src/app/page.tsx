@@ -37,7 +37,7 @@ export default async function Home() {
             <div className="flex flex-wrap gap-3 pt-1">
               <NextLink
                 href="/problems"
-                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-slate-300 bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition hover:opacity-90 dark:border-slate-600"
+                className="inline-flex min-h-[44px] items-center justify-center rounded-full border border-border bg-foreground px-4 py-2.5 text-sm font-semibold text-background transition hover:opacity-90"
               >
                 Problems
               </NextLink>
@@ -57,15 +57,15 @@ export default async function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:max-w-xs lg:grid-cols-1">
-            <div className="rounded-2xl border border-slate-200/80 bg-muted/40 p-4 dark:border-slate-800">
+            <div className="rounded-2xl border border-border bg-muted/40 p-4">
               <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Ready problems</div>
               <div className="mt-2 text-3xl font-semibold">{problems.length}</div>
             </div>
-            <div className="rounded-2xl border border-slate-200/80 bg-muted/40 p-4 dark:border-slate-800">
+            <div className="rounded-2xl border border-border bg-muted/40 p-4">
               <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Daily pick</div>
               <div className="mt-2 text-sm font-medium text-foreground">Refreshes at midnight</div>
             </div>
-            <div className="col-span-2 rounded-2xl border border-slate-200/80 bg-muted/40 p-4 dark:border-slate-800 sm:col-span-1 lg:col-span-1">
+            <div className="col-span-2 rounded-2xl border border-border bg-muted/40 p-4 sm:col-span-1 lg:col-span-1">
               <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Study flow</div>
               <div className="mt-2 text-sm text-muted-foreground">
                 Daily → deep dive → gallery notes
@@ -76,7 +76,7 @@ export default async function Home() {
       </section>
 
       {problemsError ? (
-        <div className="rounded-[28px] border border-dashed border-slate-300/80 bg-muted/30 p-5 text-sm text-muted-foreground dark:border-slate-700">
+        <div className="rounded-[28px] border border-dashed border-border bg-muted/30 p-5 text-sm text-muted-foreground">
           <div className="font-medium text-foreground">Problems unavailable</div>
           <p className="mt-1">{problemsError}</p>
         </div>
@@ -89,7 +89,7 @@ export default async function Home() {
 
       <section className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
         <div className="min-w-0 flex flex-col gap-6">
-          <div className="rounded-[24px] border border-slate-200/80 bg-card p-5 text-sm text-muted-foreground shadow-sm dark:border-slate-800">
+          <div className="rounded-[24px] border border-border bg-card p-5 text-sm text-muted-foreground shadow-sm">
             <span className="font-medium text-foreground">Tip:</span> Start from{" "}
             <NextLink href="/problems" className="text-foreground underline-offset-4 hover:underline">
               Problems

@@ -27,7 +27,7 @@ export function DailyProblem({
     return (
       <section
         aria-label="Daily problem"
-        className="rounded-[28px] border border-dashed border-slate-300/80 bg-muted/30 p-6 dark:border-slate-700"
+        className="rounded-[28px] border border-dashed border-border bg-muted/30 p-6"
       >
         <Badge tone="slate">Daily revise</Badge>
         <p className="mt-3 text-sm text-muted-foreground">
@@ -52,7 +52,7 @@ export function DailyProblem({
         href={`/problems/${daily.slug}`}
         className={cn(
           panelHeroClass,
-          "group block p-5 transition hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700 sm:p-7",
+          "group block p-5 transition hover:border-foreground/20 hover:shadow-md sm:p-7",
         )}
       >
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -72,11 +72,11 @@ export function DailyProblem({
               ) : null}
             </div>
           </div>
-          <span className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full border border-slate-300 bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition group-hover:opacity-90 dark:border-slate-600">
+          <span className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-full border border-border bg-foreground px-5 py-2.5 text-sm font-semibold text-background transition group-hover:opacity-90">
             Open problem
           </span>
         </div>
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200/80 pt-4 text-xs text-muted-foreground dark:border-slate-800">
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4 text-xs text-muted-foreground">
           <span className="font-mono text-foreground/80">{daily.slug}</span>
           <span title="Stable daily seed">Seed: {dailySeed(today)}</span>
         </div>

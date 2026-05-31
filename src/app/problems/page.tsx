@@ -29,7 +29,7 @@ export default async function ProblemsIndexPage() {
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
       <div className="flex flex-col gap-2">
         <p className="text-sm font-medium text-muted-foreground">Problem library</p>
-        <h1 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+        <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           DSA Problems
         </h1>
         <p className="max-w-3xl text-sm leading-6 text-muted-foreground sm:text-base">

@@ -198,19 +198,19 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-            <Card className="border-slate-200/80 bg-muted/40 shadow-sm dark:border-slate-800">
+            <Card className="border-border bg-muted/40 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Visible Problems</div>
                 <div className="mt-2 text-3xl font-semibold">{filtered.length}</div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200/80 bg-muted/40 shadow-sm dark:border-slate-800">
+            <Card className="border-border bg-muted/40 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Strong Coverage</div>
                 <div className="mt-2 text-3xl font-semibold">{stats.strongCoverage}</div>
               </CardContent>
             </Card>
-            <Card className="border-slate-200/80 bg-muted/40 shadow-sm dark:border-slate-800">
+            <Card className="border-border bg-muted/40 shadow-sm">
               <CardContent className="p-4">
                 <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Topics / Patterns</div>
                 <div className="mt-2 text-3xl font-semibold">
@@ -226,7 +226,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
         <RandomProblemCard problems={filtered} title="Random problem" />
       ) : null}
 
-      <Card className="rounded-[28px] border-slate-200/80 shadow-sm dark:border-slate-800">
+        <Card className="rounded-[28px] border-border shadow-sm">
         <CardHeader>
           <CardTitle>
             <div className="text-lg">Find a problem fast</div>
@@ -348,7 +348,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
       </Card>
 
       {filtered.length === 0 ? (
-        <Card className="rounded-[28px] border-dashed border-slate-300/80 bg-slate-50/60 dark:border-slate-700 dark:bg-slate-900/30">
+        <Card className="rounded-[28px] border-dashed border-border bg-muted/60">
           <CardContent className="flex flex-col items-start gap-3 p-8">
             <Badge tone="amber">No matching problems</Badge>
             <div>
@@ -369,7 +369,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
       ) : view === "grouped" ? (
         <div className="grid gap-4 xl:grid-cols-2">
           {grouped.map(([groupTopic, list]) => (
-            <Card key={groupTopic} className="rounded-[24px] border-slate-200/80 shadow-sm dark:border-slate-800">
+            <Card key={groupTopic} className="rounded-[24px] border-border shadow-sm">
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center justify-between gap-3">
                   <span>{groupTopic}</span>
@@ -381,7 +381,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                   {list.map((problem) => (
                     <li
                       key={problem.slug}
-                      className="rounded-2xl border border-slate-200/80 bg-slate-50/60 p-4 dark:border-slate-800 dark:bg-slate-900/40"
+                      className="rounded-2xl border border-border bg-muted/60 p-4"
                     >
                       <div className="flex flex-col gap-3">
                         <div className="flex items-start justify-between gap-3">
@@ -389,7 +389,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                             <span className="text-xs font-medium text-muted-foreground">#{problem.id}</span>
                             <NextLink
                               href={`/problems/${problem.slug}`}
-                              className="text-base font-semibold text-slate-900 underline-offset-4 hover:underline dark:text-slate-50"
+                              className="text-base font-semibold text-foreground underline-offset-4 hover:underline"
                             >
                               {problem.title}
                             </NextLink>
@@ -419,7 +419,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
           {ordered.map((problem) => (
             <Card
               key={problem.slug}
-              className="group rounded-[24px] border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.95))] transition duration-200 hover:-translate-y-0.5 hover:shadow-lg dark:border-slate-800 dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.9),rgba(2,6,23,0.96))]"
+              className="group rounded-[24px] border-border bg-card transition duration-200 hover:-translate-y-0.5 hover:shadow-lg"
             >
               <CardHeader className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
@@ -449,7 +449,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                   <span>Updated {formatUpdatedAt(problem.updatedAt)}</span>
                   <NextLink
                     href={`/problems/${problem.slug}`}
-                    className="font-semibold text-slate-900 hover:underline dark:text-slate-100"
+                    className="font-semibold text-foreground hover:underline"
                   >
                     Open problem
                   </NextLink>
@@ -459,12 +459,12 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
           ))}
         </div>
       ) : (
-        <Card className="rounded-[28px] border-slate-200/80 shadow-sm dark:border-slate-800">
+      <Card className="rounded-[28px] border-border shadow-sm">
           <CardHeader>
             <CardTitle>All Problems</CardTitle>
           </CardHeader>
           <CardContent>
-            <ul className="divide-y divide-slate-200/80 dark:divide-slate-800">
+            <ul className="divide-y divide-border">
               {ordered.map((problem) => (
                 <li key={problem.slug} className="py-4 first:pt-0 last:pb-0">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -473,7 +473,7 @@ export function ProblemsClient({ problems }: { problems: ProblemMeta[] }) {
                       <div className="space-y-2">
                         <NextLink
                           href={`/problems/${problem.slug}`}
-                          className="text-base font-semibold text-slate-900 hover:underline dark:text-slate-50"
+                          className="text-base font-semibold text-foreground hover:underline"
                         >
                           {problem.title}
                         </NextLink>

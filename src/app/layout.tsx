@@ -1,9 +1,16 @@
 import type { Metadata } from "next";
+import { Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import "./prism.css";
 import { ThemeInitScript } from "@/components/theme/ThemeInitScript";
 import { AppShell } from "@/components/ui/AppShell";
 import { ClarityInitializer } from "@/components/analytics/ClarityInitializer";
+
+const shareTechMono = Share_Tech_Mono({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-share-tech-mono",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -36,7 +43,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+    <html lang="en" className={`${shareTechMono.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <ThemeInitScript />
         <ClarityInitializer />

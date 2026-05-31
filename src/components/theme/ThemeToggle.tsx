@@ -53,8 +53,7 @@ export function ThemeToggle() {
       onClick={onToggle}
       className={cn(
         "inline-flex items-center justify-center rounded-lg border px-3 py-2 text-xs font-medium",
-        "border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-50",
-        "dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:hover:bg-zinc-900",
+        "border-border bg-card text-card-foreground hover:bg-muted",
       )}
       aria-label="Toggle theme"
     >

@@ -55,7 +55,7 @@ export function RandomProblemCard({
     return (
       <section
         className={cn(
-          "rounded-[28px] border border-dashed border-slate-300/80 bg-muted/30 p-5 dark:border-slate-700",
+          "rounded-[28px] border border-dashed border-border bg-muted/30 p-5",
           className,
         )}
       >
@@ -98,7 +98,7 @@ export function RandomProblemCard({
 
       <NextLink
         href={`/problems/${selected.slug}`}
-        className="group block overflow-hidden rounded-[28px] border border-slate-200/80 bg-card p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:hover:border-slate-700 sm:p-6"
+        className="group block overflow-hidden rounded-[28px] border border-border bg-card p-5 shadow-sm transition hover:border-foreground/20 hover:shadow-md sm:p-6"
       >
         <div className="space-y-3">
           <h2 className="text-xl font-semibold tracking-tight text-foreground transition group-hover:underline sm:text-2xl">

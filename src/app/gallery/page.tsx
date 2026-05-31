@@ -26,9 +26,9 @@ export default async function GalleryPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:py-10 pb-24 sm:pb-10">
-      <section className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-card p-5 shadow-sm dark:border-slate-800 sm:p-7">
+      <section className="overflow-hidden rounded-[28px] border border-border bg-card p-5 shadow-sm sm:p-7">
         <p className="text-sm font-medium text-muted-foreground">Study visuals</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
           Gallery
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">

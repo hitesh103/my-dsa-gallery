@@ -292,8 +292,8 @@ export function FlowDiagram({
   if (!steps || steps.length === 0) return null;
 
   const isDark = colorMode === "dark";
-  const bg = isDark ? "#09090b" : "#fafafa";
-  const border = isDark ? "rgba(255,255,255,0.10)" : "rgba(24,24,27,0.10)";
+  const bg = isDark ? "hsl(210, 9%, 14%)" : "hsl(0, 0%, 91.8%)";
+  const border = isDark ? "hsla(210, 5%, 20%, 1)" : "hsla(0, 0%, 80%, 1)";
   const step = steps[activeStepIndex];
   const hasMultipleSteps = steps.length > 1;
   const legendItems = extractLegendItems(steps, activeStepIndex);
@@ -344,21 +344,21 @@ export function FlowDiagram({
               "flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
               activeStepIndex === 0 ? "cursor-not-allowed opacity-40" : "hover:bg-accent"
             )}
-            style={{ color: isDark ? "#e4e4e7" : "#18181b" }}
+            style={{ color: isDark ? "#fff" : "#000" }}
           >
             ← Prev
           </button>
           <div className="flex flex-col items-center gap-1">
             <span
               className="max-w-[200px] truncate text-sm font-semibold sm:max-w-none"
-              style={{ color: isDark ? "#e4e4e7" : "#18181b" }}
+              style={{ color: isDark ? "#fff" : "#000" }}
             >
               {step.label || `Step ${activeStepIndex + 1}`}
             </span>
             {step.description ? (
               <span
                 className="max-w-[200px] truncate text-xs sm:max-w-none"
-                style={{ color: isDark ? "#a1a1aa" : "#71717a" }}
+                style={{ color: isDark ? "hsl(0, 0%, 60%)" : "hsl(0, 0%, 40%)" }}
               >
                 {step.description}
               </span>
@@ -378,14 +378,12 @@ export function FlowDiagram({
                   <span
                     className={cn("block h-2 w-2 rounded-full", idx === activeStepIndex ? "" : "opacity-40")}
                     style={{
-                      backgroundColor:
-                        idx === activeStepIndex
-                          ? isDark
-                            ? "#3b82f6"
-                            : "#2563eb"
-                          : isDark
-                            ? "#71717a"
-                            : "#a1a1aa",
+                    backgroundColor:
+                      idx === activeStepIndex
+                        ? "hsl(210, 100%, 56%)"
+                        : isDark
+                          ? "hsl(0, 0%, 60%)"
+                          : "hsl(0, 0%, 40%)",
                     }}
                   />
                 </button>
@@ -400,7 +398,7 @@ export function FlowDiagram({
               "flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg px-2.5 py-2 text-sm font-medium transition-colors",
               activeStepIndex === steps.length - 1 ? "cursor-not-allowed opacity-40" : "hover:bg-accent"
             )}
-            style={{ color: isDark ? "#e4e4e7" : "#18181b" }}
+            style={{ color: isDark ? "#fff" : "#000" }}
           >
             Next →
           </button>
@@ -412,7 +410,7 @@ export function FlowDiagram({
             type="button"
             onClick={() => setIsFullscreen((prev) => !prev)}
             className={actionButtonClassName}
-            style={{ borderColor: border, color: isDark ? "#e4e4e7" : "#18181b" }}
+            style={{ borderColor: border, color: isDark ? "#fff" : "#000" }}
           >
             {fullscreen ? "Exit full screen" : "Full screen"}
           </button>

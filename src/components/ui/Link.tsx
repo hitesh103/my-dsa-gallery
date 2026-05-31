@@ -7,7 +7,7 @@ type Props = AnchorHTMLAttributes<HTMLAnchorElement>;
 
 export function Link({ className, href, ...props }: Props) {
   const classes = cn(
-    "font-medium underline underline-offset-4 decoration-zinc-300 hover:decoration-zinc-800 dark:decoration-zinc-700 dark:hover:decoration-zinc-200",
+    "font-medium underline underline-offset-4 decoration-link/40 hover:decoration-link",
     className,
   );
 
