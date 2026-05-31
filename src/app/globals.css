@@ -133,6 +133,13 @@ body {
     border-color: hsl(var(--link));
   }
 
+  /* No bottom border on nav links */
+  header a,
+  nav a,
+  footer a {
+    border-bottom: none;
+  }
+
   /* iOS Safe Area Support */
   .safe-area-bottom {
     padding-bottom: env(safe-area-inset-bottom);
