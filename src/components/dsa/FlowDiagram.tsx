@@ -381,8 +381,8 @@ export function FlowDiagram({
                     backgroundColor:
                       idx === activeStepIndex
                         ? isDark
-                          ? "hsl(0, 72%, 56%)"
-                          : "hsl(0, 72%, 42%)"
+                          ? "hsl(270, 65%, 65%)"
+                          : "hsl(270, 65%, 48%)"
                         : isDark
                           ? "hsl(0, 0%, 60%)"
                           : "hsl(0, 0%, 40%)",

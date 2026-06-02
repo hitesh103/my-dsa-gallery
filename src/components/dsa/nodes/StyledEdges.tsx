@@ -99,7 +99,7 @@ export function StyledEdge({
           strokeWidth,
           strokeDasharray: style.dashed ? "5,5" : undefined,
           stroke: selected 
-            ? "rgb(185 28 28)" 
+            ? "rgb(147 51 234)" 
             : style.stroke.includes("blue") 
               ? "rgb(37 99 235)"
               : style.stroke.includes("purple")
@@ -166,7 +166,7 @@ export function StraightStyledEdge({
           strokeWidth,
           strokeDasharray: style.dashed ? "5,5" : undefined,
           stroke: selected 
-            ? "rgb(185 28 28)" 
+            ? "rgb(147 51 234)" 
             : style.stroke.includes("blue") 
               ? "rgb(37 99 235)"
               : style.stroke.includes("purple")
