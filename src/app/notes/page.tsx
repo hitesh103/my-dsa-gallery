@@ -1,4 +1,3 @@
-import { AppShell } from "@/components/ui/AppShell";
 import { listContentItems } from "@/lib/contentStore";
 import type { ContentItemMeta } from "@/lib/contentDoc";
 import Link from "next/link";
@@ -8,7 +7,14 @@ export const dynamic = "force-dynamic";
 export default async function NotesIndexPage() {
   let notes: ContentItemMeta[] = [];
   try {
-    notes = await listContentItems({ type: "note" });
+    // Fetch both notes and blogs, and include drafts for now so user can see their content
+    const [noteItems, blogItems] = await Promise.all([
+      listContentItems({ type: "note", status: "" }),
+      listContentItems({ type: "blog", status: "" })
+    ]);
+    notes = [...noteItems, ...blogItems].sort((a, b) => 
+      new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime()
+    );
   } catch (e) {
     // Silently fail for now
   }
@@ -32,6 +38,16 @@ export default async function NotesIndexPage() {
             href={`/notes/${note.slug}`}
             className="group flex flex-col p-6 rounded-xl border bg-card hover:border-primary transition-colors"
           >
+            <div className="flex items-center justify-between mb-2">
+               <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                 {note.type}
+               </span>
+               {note.status === "draft" && (
+                 <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500">
+                   Draft
+                 </span>
+               )}
+            </div>
             <h3 className="text-lg font-semibold group-hover:text-primary transition-colors">
               {note.title}
             </h3>
@@ -49,7 +65,7 @@ export default async function NotesIndexPage() {
 
         {notes.length === 0 && (
           <div className="col-span-full py-20 text-center border rounded-xl bg-muted/30">
-            <p className="text-muted-foreground">No notes available yet.</p>
+            <p className="text-muted-foreground">No notes or blogs available yet.</p>
             <Link href="/admin/notes/new" className="mt-4 inline-block text-primary hover:underline font-medium">
               Create the first one
             </Link>
