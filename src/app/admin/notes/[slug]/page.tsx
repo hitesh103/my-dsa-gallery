@@ -9,7 +9,8 @@ import type { ContentItemDoc } from "@/lib/contentDoc";
 
 export default function EditNotePage() {
   const { slug } = useParams();
-  const { isAdmin, loading: authLoading } = useAdminAuth();
+  const { loggedIn, status: authStatus } = useAdminAuth();
+  const authLoading = authStatus === null;
   const [doc, setDoc] = useState<ContentItemDoc | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,7 +27,7 @@ export default function EditNotePage() {
   }, [slug]);
 
   if (authLoading || loading) return null;
-  if (!isAdmin) return <div className="p-10 text-center">Unauthorized</div>;
+  if (!loggedIn) return <div className="p-10 text-center">Unauthorized</div>;
   if (!doc) return <div className="p-10 text-center">Note not found</div>;
 
   const handleSave = async (updatedDoc: ContentItemDoc) => {

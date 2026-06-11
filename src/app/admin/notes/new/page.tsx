@@ -5,10 +5,11 @@ import { ContentEditor } from "@/app/admin/ui/ContentEditor";
 import { AppShell } from "@/components/ui/AppShell";
 
 export default function NewNotePage() {
-  const { isAdmin, loading } = useAdminAuth();
+  const { loggedIn, status } = useAdminAuth();
+  const loading = status === null;
 
   if (loading) return null;
-  if (!isAdmin) return <div className="p-10 text-center">Unauthorized</div>;
+  if (!loggedIn) return <div className="p-10 text-center">Unauthorized</div>;
 
   const handleSave = async (doc: any) => {
     const res = await fetch("/api/admin/content", {

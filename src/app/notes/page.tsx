@@ -1,11 +1,12 @@
 import { AppShell } from "@/components/ui/AppShell";
 import { listContentItems } from "@/lib/contentStore";
+import type { ContentItemMeta } from "@/lib/contentDoc";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
 export default async function NotesIndexPage() {
-  let notes = [];
+  let notes: ContentItemMeta[] = [];
   try {
     notes = await listContentItems({ type: "note" });
   } catch (e) {
