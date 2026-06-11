@@ -28,6 +28,16 @@ export function ContentEditor({ initialDoc, onSave }: ContentEditorProps) {
 
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<"edit" | "preview" | "json">("edit");
+  const [jsonText, setJsonText] = useState("");
+  const [jsonError, setJsonError] = useState<string | null>(null);
+
+  // Sync jsonText when switching to json tab
+  useEffect(() => {
+    if (activeTab === "json") {
+      setJsonText(JSON.stringify(doc, null, 2));
+      setJsonError(null);
+    }
+  }, [activeTab]); // Only sync when entering the tab
 
   const addSection = () => {
     const newSection: ContentItemSection = {
@@ -78,6 +88,24 @@ export function ContentEditor({ initialDoc, onSave }: ContentEditorProps) {
       alert(err instanceof Error ? err.message : "Failed to save");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleJsonChange = (val: string) => {
+    setJsonText(val);
+    try {
+      const parsed = JSON.parse(val);
+      // Map common external formats to internal schema
+      const mapped = {
+        ...parsed,
+        revisionJson: parsed.revisionJson || parsed.revision || [],
+        mistakesJson: parsed.mistakesJson || parsed.mistakes || [],
+        visualsJson: parsed.visualsJson || parsed.visuals || [],
+      };
+      setDoc(mapped);
+      setJsonError(null);
+    } catch (err) {
+      setJsonError(err instanceof Error ? err.message : "Invalid JSON");
     }
   };
 
@@ -201,24 +229,15 @@ export function ContentEditor({ initialDoc, onSave }: ContentEditorProps) {
             You can paste your blog JSON here. It will automatically map fields like `revision` to `revisionJson`.
           </div>
           <textarea
-            value={JSON.stringify(doc, null, 2)}
-            onChange={(e) => {
-              try {
-                const parsed = JSON.parse(e.target.value);
-                // Map common external formats to internal schema
-                const mapped = {
-                  ...parsed,
-                  revisionJson: parsed.revisionJson || parsed.revision || [],
-                  mistakesJson: parsed.mistakesJson || parsed.mistakes || [],
-                  visualsJson: parsed.visualsJson || parsed.visuals || [],
-                };
-                setDoc(mapped);
-              } catch (err) {
-                // Ignore parse errors while typing
-              }
-            }}
-            className="w-full p-4 border rounded-md bg-background font-mono text-xs min-h-[600px]"
+            value={jsonText}
+            onChange={(e) => handleJsonChange(e.target.value)}
+            className={`w-full p-4 border rounded-md bg-background font-mono text-xs min-h-[600px] ${jsonError ? "border-destructive focus:ring-destructive" : ""}`}
           />
+          {jsonError && (
+            <div className="text-xs text-destructive font-mono mt-1">
+              {jsonError}
+            </div>
+          )}
         </div>
       )}
     </div>
