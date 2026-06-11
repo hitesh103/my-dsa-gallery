@@ -41,14 +41,14 @@ export type ContentItemSection = z.infer<typeof ContentItemSectionSchema>;
 
 export const ContentItemDocSchema = z.object({
   slug: z.string(),
-  type: z.enum(["problem", "note", "article"]),
+  type: z.enum(["problem", "note", "article", "blog"]),
   title: z.string(),
   summary: z.string().optional(),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
   visibility: z.enum(["public", "private"]).default("public"),
   source: z.string().optional(),
   sourceUrl: z.string().optional(),
-  difficulty: z.enum(["easy", "medium", "hard"]).optional(),
+  difficulty: z.string().optional(), // Made more flexible
   topic: z.string().optional(),
   pattern: z.string().optional(),
   tags: z.array(z.string()).default([]),

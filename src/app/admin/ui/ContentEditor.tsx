@@ -197,12 +197,22 @@ export function ContentEditor({ initialDoc, onSave }: ContentEditorProps) {
       {activeTab === "json" && (
         <div className="space-y-2">
           <label className="text-sm font-medium">Direct JSON Edit (Advanced)</label>
+          <div className="text-xs text-muted-foreground mb-2">
+            You can paste your blog JSON here. It will automatically map fields like `revision` to `revisionJson`.
+          </div>
           <textarea
             value={JSON.stringify(doc, null, 2)}
             onChange={(e) => {
               try {
                 const parsed = JSON.parse(e.target.value);
-                setDoc(parsed);
+                // Map common external formats to internal schema
+                const mapped = {
+                  ...parsed,
+                  revisionJson: parsed.revisionJson || parsed.revision || [],
+                  mistakesJson: parsed.mistakesJson || parsed.mistakes || [],
+                  visualsJson: parsed.visualsJson || parsed.visuals || [],
+                };
+                setDoc(mapped);
               } catch (err) {
                 // Ignore parse errors while typing
               }
