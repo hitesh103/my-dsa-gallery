@@ -16,6 +16,13 @@ function getIsDark(): boolean {
   return document.documentElement.classList.contains("dark");
 }
 
+function sanitizeMermaidCode(code: string): string {
+  return code.replace(/"([^"\n]*)"/g, (m, inner) => {
+    const escaped = inner.replace(/[()]/g, (c: string) => (c === "(" ? "#40;" : "#41;"));
+    return `"${escaped}"`;
+  });
+}
+
 type MermaidRendererProps = {
   code: string;
   className?: string;
@@ -24,10 +31,11 @@ type MermaidRendererProps = {
 export function MermaidRenderer({ code, className }: MermaidRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [svg, setSvg] = useState<string>("");
-  const [isDark, setIsDark] = useState(() => getIsDark());
+  const [isDark, setIsDark] = useState(false);
   const initialized = useRef(false);
 
   useEffect(() => {
+    setIsDark(getIsDark());
     const observer = new MutationObserver(() => {
       setIsDark(getIsDark());
     });
@@ -61,7 +69,7 @@ export function MermaidRenderer({ code, className }: MermaidRendererProps) {
 
       try {
         const id = `mermaid-${Math.random().toString(36).slice(2, 9)}`;
-        const { svg } = await mermaid.render(id, code);
+        const { svg } = await mermaid.render(id, sanitizeMermaidCode(code));
         setSvg(svg);
       } catch (e) {
         console.error("Mermaid render error:", e);
@@ -94,9 +102,10 @@ type MermaidStepperProps = {
 export function MermaidStepper({ steps, className }: MermaidStepperProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [renderedSvgs, setRenderedSvgs] = useState<Map<number, string>>(new Map());
-  const [isDark, setIsDark] = useState(() => getIsDark());
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
+    setIsDark(getIsDark());
     const observer = new MutationObserver(() => {
       setIsDark(getIsDark());
     });
@@ -120,7 +129,7 @@ export function MermaidStepper({ steps, className }: MermaidStepperProps) {
 
       try {
         const id = `mermaid-step-${index}-${Math.random().toString(36).slice(2, 9)}`;
-        const { svg } = await mermaid.render(id, code);
+        const { svg } = await mermaid.render(id, sanitizeMermaidCode(code));
         setRenderedSvgs((prev) => new Map(prev).set(index, svg));
       } catch (e) {
         console.error("Mermaid render error:", e);
