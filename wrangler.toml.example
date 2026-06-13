@@ -10,12 +10,11 @@ binding = "ASSETS"
 
 [observability]
 enabled = true
-# Optional: sample a fraction of requests (0..1). Default is 1.
 head_sampling_rate = 1
 
-# D1 (recommended for in-app editing + search)
-[[d1_databases]]
-binding = "DB"
-database_name = "my-dsa-gallery"
-database_id = "2947afb4-1063-4999-a9bb-223e23c3281a"
-migrations_dir = "migrations"
+# Copy this to wrangler.toml and fill in your values
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "my-dsa-gallery"
+# database_id = "<your-database-id>"
+# migrations_dir = "migrations"
