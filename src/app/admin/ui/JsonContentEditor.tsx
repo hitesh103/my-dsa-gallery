@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ContentItemDoc } from "@/lib/contentDoc";
+import { ContentItemDocSchema } from "@/lib/contentDoc";
 
 function defaultPayload(): ContentItemDoc {
   return {
@@ -86,21 +87,40 @@ export function JsonContentEditor({
   };
 
   const onUpsert = async () => {
-    let payload: ContentItemDoc;
+    let raw: Record<string, unknown>;
     try {
-      payload = JSON.parse(jsonText) as ContentItemDoc;
+      raw = JSON.parse(jsonText) as Record<string, unknown>;
     } catch {
       onStatus("Invalid JSON.");
       return;
     }
 
-    const targetSlug = (payload.slug ?? "").trim();
-    if (!targetSlug || !isValidSlug(targetSlug)) {
-      onStatus("Payload must include a valid `slug` (lowercase a-z, 0-9, hyphen).");
+    // Map common external field names to internal schema
+    const mapped = {
+      ...raw,
+      revisionJson: raw.revisionJson || raw.revision || [],
+      mistakesJson: raw.mistakesJson || raw.mistakes || [],
+      visualsJson: raw.visualsJson || raw.visuals || [],
+    };
+    delete (mapped as any).revision;
+    delete (mapped as any).mistakes;
+    delete (mapped as any).visuals;
+    delete (mapped as any).relations;
+
+    // Validate with Zod for better error messages
+    const result = ContentItemDocSchema.safeParse(mapped);
+    if (!result.success) {
+      const issues = result.error.issues.map(
+        (i) => `${i.path.join(".")}: ${i.message}`,
+      );
+      onStatus(`Validation error:\n${issues.join("\n")}`);
       return;
     }
-    if (!payload.title || !payload.type || !payload.content) {
-      onStatus("Payload missing required fields: slug, title, type, content.");
+    const payload = result.data;
+
+    const targetSlug = payload.slug.trim();
+    if (!targetSlug || !isValidSlug(targetSlug)) {
+      onStatus("Payload must include a valid `slug` (lowercase a-z, 0-9, hyphen).");
       return;
     }
 

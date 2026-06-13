@@ -433,7 +433,7 @@ export function AdminClient() {
             Cloudflare-first control panel for D1 content, search, deletes, and direct SQL work.
           </div>
           {status ? (
-            <div className="rounded-xl border bg-card p-3 text-sm text-muted-foreground">{status}</div>
+            <div className="rounded-xl border bg-card p-3 text-sm text-muted-foreground whitespace-pre-wrap">{status}</div>
           ) : null}
         </CardContent>
       </Card>
