@@ -20,8 +20,7 @@
 # OpenNext (Cloudflare adapter output)
 .open-next
 
-# Cloudflare config (contains DB IDs, secrets)
-/wrangler.toml
+
 
 # production
 /build
