@@ -11,6 +11,7 @@ import type { ProblemContent } from "@/lib/problemDoc";
 import type { AdminProblemSummary } from "@/lib/problemStore";
 import { toneForPattern, toneForTopic } from "@/lib/tags";
 import { JsonProblemEditor } from "./JsonProblemEditor";
+import { JsonContentEditor } from "./JsonContentEditor";
 import { AdminSqlConsole } from "./AdminSqlConsole";
 import { TagManager } from "./TagManager";
 
@@ -117,6 +118,16 @@ export function AdminClient() {
     topic: "",
     pattern: "",
     link: "",
+  });
+
+  const [creatingNote, setCreatingNote] = useState(false);
+  const [noteSlugTouched, setNoteSlugTouched] = useState(false);
+  const [noteForm, setNoteForm] = useState({
+    title: "",
+    slug: "",
+    summary: "",
+    type: "note" as "note" | "article" | "blog",
+    topic: "",
   });
 
   const loadDashboard = async () => {
@@ -269,6 +280,52 @@ export function AdminClient() {
       router.refresh();
     } catch (e) {
       setStatus(e instanceof Error ? e.message : "Logout failed");
+    }
+  };
+
+  const onCreateNote = async () => {
+    const payload = {
+      slug: noteForm.slug.trim(),
+      type: noteForm.type,
+      title: noteForm.title.trim(),
+      summary: noteForm.summary.trim() || undefined,
+      topic: noteForm.topic.trim() || undefined,
+      status: "draft",
+      visibility: "public",
+      tags: [],
+      content: {
+        format: "sections" as const,
+        sections: [],
+      },
+      revisionJson: [],
+      mistakesJson: [],
+      visualsJson: [],
+    };
+
+    if (!payload.slug || !payload.title) {
+      setStatus("Fill title and slug before creating a note.");
+      return;
+    }
+
+    setCreatingNote(true);
+    setStatus(null);
+    try {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error ?? "Create failed");
+      setStatus(`Created "${
+        payload.slug
+      }". Opening editor.`);
+      await refreshAll();
+      router.push(`/admin/notes/${payload.slug}`);
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : "Create failed");
+    } finally {
+      setCreatingNote(false);
     }
   };
 
@@ -682,6 +739,105 @@ export function AdminClient() {
             </CardContent>
           </Card>
 
+          <Card>
+            <CardHeader>
+              <CardTitle>Quick Create Note</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid gap-3">
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs font-medium text-muted-foreground">Type</span>
+                  <select
+                    value={noteForm.type}
+                    onChange={(e) =>
+                      setNoteForm((current) => ({
+                        ...current,
+                        type: e.target.value as "note" | "article" | "blog",
+                      }))
+                    }
+                    className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                  >
+                    <option value="note">Note</option>
+                    <option value="article">Article</option>
+                    <option value="blog">Blog</option>
+                  </select>
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs font-medium text-muted-foreground">Title</span>
+                  <input
+                    value={noteForm.title}
+                    onChange={(e) => {
+                      const title = e.target.value;
+                      setNoteForm((current) => ({
+                        ...current,
+                        title,
+                        slug: noteSlugTouched ? current.slug : slugify(title),
+                      }));
+                    }}
+                    placeholder="Example: Binary Search Basics"
+                    className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs font-medium text-muted-foreground">Slug</span>
+                  <input
+                    value={noteForm.slug}
+                    onChange={(e) => {
+                      setNoteSlugTouched(true);
+                      setNoteForm((current) => ({ ...current, slug: slugify(e.target.value) }));
+                    }}
+                    placeholder="binary-search-basics"
+                    className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs font-medium text-muted-foreground">Summary</span>
+                  <input
+                    value={noteForm.summary}
+                    onChange={(e) =>
+                      setNoteForm((current) => ({ ...current, summary: e.target.value }))
+                    }
+                    placeholder="Brief overview of the note"
+                    className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                  />
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className="text-xs font-medium text-muted-foreground">Topic</span>
+                  <input
+                    list="admin-topics"
+                    value={noteForm.topic}
+                    onChange={(e) =>
+                      setNoteForm((current) => ({ ...current, topic: e.target.value }))
+                    }
+                    placeholder="Arrays"
+                    className="h-11 rounded-lg border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring/30"
+                  />
+                </label>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void onCreateNote()}
+                  disabled={creatingNote}
+                  className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted disabled:opacity-50"
+                >
+                  {creatingNote ? "Creating…" : "Create and Open"}
+                </button>
+                <Link
+                  href="/admin/notes/new"
+                  className="inline-flex items-center justify-center rounded-lg border px-4 py-2.5 text-sm font-medium hover:bg-muted"
+                >
+                  Blank Editor
+                </Link>
+              </div>
+
+              <div className="text-xs text-muted-foreground">
+                Creates a minimal D1 record immediately, then opens the full editor for the write-up.
+              </div>
+            </CardContent>
+          </Card>
+
           <TagManager />
         </div>
 
@@ -697,10 +853,19 @@ export function AdminClient() {
 
           <Card>
             <CardHeader>
-              <CardTitle>JSON Editor</CardTitle>
+              <CardTitle>JSON Editor (Problems)</CardTitle>
             </CardHeader>
             <CardContent>
               <JsonProblemEditor onStatus={(message) => setStatus(message)} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>JSON Editor (Notes)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <JsonContentEditor onStatus={(message) => setStatus(message)} />
             </CardContent>
           </Card>
         </div>
