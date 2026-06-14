@@ -17,8 +17,8 @@ function safePrefix(prefix: string | undefined) {
   if (p === "gallery/" || p === "gallery") return "gallery/";
 
   const normalized = p.endsWith("/") ? p : `${p}/`;
-  // Allow per-problem uploads only: problems/<slug>/
-  if (/^problems\/[a-z0-9-]+\/$/.test(normalized)) return normalized;
+  // Allow per-problem and per-note uploads
+  if (/^(problems|notes)\/[a-z0-9-]+\/$/.test(normalized)) return normalized;
 
   throw new Error("Invalid prefix");
 }
