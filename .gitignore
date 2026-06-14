@@ -25,6 +25,9 @@
 # production
 /build
 
+# wrangler local state
+.wrangler
+
 # misc
 .DS_Store
 *.pem
